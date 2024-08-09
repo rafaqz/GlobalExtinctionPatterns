@@ -28,9 +28,10 @@ function plot_extinctions!(ax, df;
     xs, ys = df.yearLastSeen_cleaned, df.EstimatedMass
     # xs, ys = s1.yearLastSeen_cleaned .- s1.colonised, log.(s1.Mass)
     # ys = shuffle(ys)
+    color = colordata isa Symbol ? getproperty(df, colordata) : colordata
     p = Makie.plot!(ax, xs, ys;
         label="Extinctions",
-        color=getproperty(df, colordata),
+        color,
         colormap, colorrange,
         inspector_label=(_, i, _) -> "$(df.GBIFSpecies[i])\nClass: $(df.className[i])\nIsland: $(df.Location[i])\nArea: $(df.Area[i])\nMass: $(ys[i])\nExtinct: $(xs[i])",
     )
@@ -64,7 +65,7 @@ end
 
 function plot_subsets(subset_layout, subsets, trends;
     colormap=:managua,
-    colordata=:classNum,
+    colordata=:colonised,
     colorrange=extrema(skipmissing(getproperty(subsets.all.df, colordata))),
 )
     kw = (; yscale=log10, xlabel="Year last seen", ylabel="Mass")
