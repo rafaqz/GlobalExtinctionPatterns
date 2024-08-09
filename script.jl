@@ -144,7 +144,7 @@ subset_layout = [
 ]
 using CairoMakie
 fig = plot_subsets(subset_layout, subsets, trends; colordata=:colonised)
-# save("images/mass_and_extinction.png", fig)
+save("images/mass_and_extinction.png", fig)
 
 # Australia
 
@@ -194,7 +194,6 @@ ax = Axis(fig[1, 1];
     xticks = (log.(10 .^ (0:6)), ["1g", "10g", "100g", "1Kg", "10Kg", "100Kg", "1Mg"])
 )
 map(all_logmasses, enumerate(keys(all_logmasses))) do lm, (i, label)
-    println(label)
     density!(ax, lm;
         boundary=(0, 30),
         color=(:white, 0.0),
