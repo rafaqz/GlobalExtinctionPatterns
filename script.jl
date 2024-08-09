@@ -205,3 +205,5 @@ map(all_logmasses, enumerate(keys(all_logmasses))) do lm, (i, label)
 end
 axislegend(ax; position=:rt)
 xlims!(ax, (0, log(1e6)))
+
+save("images/mass_density.png", fig)
