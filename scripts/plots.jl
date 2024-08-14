@@ -133,9 +133,8 @@ subset_layout = [
     :inhabited_islands   :inhabited_early   :inhabited_late #:west_indies
     :uninhabited_islands :uninhabited_early :uninhabited_late #nothing
 ]
-using CairoMakie
 fig = plot_subsets(subset_layout, subsets, trends; colordata=:colonised)
-save("images/mass_and_extinction.png", fig)
+save("$basepath/images/mass_and_extinction.png", fig)
 
 # Australia
 
@@ -170,12 +169,14 @@ selected_logmasses = map(subsets[density_layout]) do (; df)
     log.(df.EstimatedMass)
 end
 colors = collect(ColorSchemes.Bay)
+
 # If we have all the animal trait data put it in the plot too
 if isdefined(Main, :mean_mass_df)
     colors[1] = RGB(0.0, 0.0, 0.0)
     all_vertebrates = log.(skipmissing(mean_mass_df.Mass_mean))
     all_logmasses = merge((; all_vertebrates), selected_logmasses)
 else
+    # Otherwise just plot the extinct species
     all_logmasses = selected_logmasses
 end
 
@@ -184,6 +185,7 @@ ax = Axis(fig[1, 1];
     xlabel="Mass",
     xticks = (log.(10 .^ (0:6)), ["1g", "10g", "100g", "1Kg", "10Kg", "100Kg", "1Mg"])
 )
+xlims!(ax, (0, log(1e6)))
 map(all_logmasses, enumerate(keys(all_logmasses))) do lm, (i, label)
     density!(ax, lm;
         boundary=(0, 30),
@@ -194,6 +196,5 @@ map(all_logmasses, enumerate(keys(all_logmasses))) do lm, (i, label)
     )
 end
 axislegend(ax; position=:rt)
-xlims!(ax, (0, log(1e6)))
 
-save("images/mass_density.png", fig)
+save("$basepath/images/mass_density.png", fig)
