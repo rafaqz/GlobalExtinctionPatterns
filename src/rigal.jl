@@ -1,5 +1,3 @@
-using GLM
-
 function classify_trend(x_init, y;
     significant=0.05,
 )
@@ -60,7 +58,6 @@ function classify_trend(x_init, y;
 end
 
 
-# using GLMakie
 # @testset "test trends" begin
 #     n = 20
 #     x = range(0, 1, n)

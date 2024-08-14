@@ -1,6 +1,3 @@
-using CSV
-using DataFrames
-
 function meanmass(xs)
     xs1 = filter(skipmissing(xs)) do x
         x > 0

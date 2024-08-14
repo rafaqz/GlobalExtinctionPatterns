@@ -1,6 +1,3 @@
-using CairoMakie
-using GLMakie
-
 function plot_extinctions(df; kw...)
     fig = Figure()
     ax = Axis(fig[1, 1];

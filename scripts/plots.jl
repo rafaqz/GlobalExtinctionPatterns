@@ -1,26 +1,17 @@
-using StaticArrays
-using Statistics
-using StatsBase
-using Shapefile
 using CSV
 using DataFrames
-using XLSX
-using TerminalPager
-using GBIF2
-using Loess
-using Random
 using ColorSchemes
 using Colors
+using StatsBase
+# using CairoMakie
+using GLMakie
 
-include("rigal.jl")
-include("gbif.jl")
-include("plots.jl")
-include("traits.jl")
-
+using GlobalExtinctionPatterns
 
 # Load data and process
+basepath = realpath(joinpath(dirname(pathof(GlobalExtinctionPatterns)), ".."))
 
-extinct_species_mass_path = "data/extinct_species_mass.csv"
+extinct_species_mass_path = joinpath(basepath, "data/extinct_species_mass.csv")
 classes = ["AVES", "MAMMALIA", "REPTILIA"]
 
 # Remove to generate data again from raw sources
