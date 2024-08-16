@@ -63,6 +63,9 @@ else
     CSV.write(extinct_species_mass_path, s1)
 end
 
+# using TerminalPager
+# s1 |> pager
+
 # Add numerical classes for plot colors 
 s1.classNum = collect(map(x -> findfirst(==(x), intersect(classes, s1.className)) , s1.className))
 
