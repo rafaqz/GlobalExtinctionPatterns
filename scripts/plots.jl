@@ -5,6 +5,7 @@ using Colors
 using StatsBase
 # using CairoMakie
 using GLMakie
+using Revise
 
 using GlobalExtinctionPatterns
 

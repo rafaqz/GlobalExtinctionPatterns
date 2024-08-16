@@ -1,6 +1,7 @@
 using Turing
 using GlobalExtinctionPatterns
 using GLMakie
+using Revise
 
 mass_df = load_mass_table()
 
