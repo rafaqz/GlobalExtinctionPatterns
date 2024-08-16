@@ -9,8 +9,9 @@ using GLMakie
 using GlobalExtinctionPatterns
 
 basepath = GlobalExtinctionPatterns.basepath
+classes = ["AVES", "MAMMALIA", "REPTILIA"]
 
-mass_df = load_mass_table()
+mass_df = load_mass_table(; classes)
 
 # using TerminalPager
 # mass_df |> pager
@@ -86,7 +87,7 @@ subset_layout = [
     :uninhabited_islands :uninhabited_early :uninhabited_late #nothing
 ]
 fig = plot_subsets(subset_layout, subsets, trends; colordata=:colonised)
-save(joinpath(basepath, "images/mass_and_extinction.png", fig)
+save(joinpath(basepath, "images/mass_and_extinction.png"), fig)
 
 # Australia
 
