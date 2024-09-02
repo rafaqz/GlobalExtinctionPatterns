@@ -17,7 +17,7 @@ mass_df = load_mass_table(; classes)
 # using TerminalPager
 # mass_df |> pager
 
-# Add numerical classes for plot colors 
+# Add numerical classes for plot colors
 mass_df.classNum = collect(map(x -> findfirst(==(x), intersect(classes, mass_df.className)) , mass_df.className))
 
 # Inspect the data
@@ -83,12 +83,28 @@ end
 
 subset_layout = [
     :islands             :islands_early     :islands_late #nothing
-    # :mascarenes          :not_mascarenes    :non_mascarene_uninhabited
     :inhabited_islands   :inhabited_early   :inhabited_late #:west_indies
     :uninhabited_islands :uninhabited_early :uninhabited_late #nothing
 ]
-fig = plot_subsets(subset_layout, subsets, trends; colordata=:colonised)
-save(joinpath(basepath, "images/mass_and_extinction.png"), fig)
+fig = plot_subsets(subset_layout, subsets, trends; colordata=:classNum)
+save(joinpath(basepath, "images/mass_and_extinction_subsets.png"), fig)
+
+small_layout = [
+    :inhabited_early   :inhabited_late #:west_indies
+    :uninhabited_early :uninhabited_late #nothing
+]
+fig = plot_subsets(small_layout, subsets, trends;
+    colordata=:classNum,
+    legend=1:3 .=> titlecase.(classes),
+)
+save(joinpath(basepath, "images/mass_and_extinction_splits.png"), fig)
+
+fig = plot_extinctions(subsets.all;
+    colordata=:classNum,
+    trend=trends.all,
+    legend=titlecase.(classes) .=> 1:3,
+)
+save(joinpath(basepath, "images/global_mass_and_extinction.png"), fig)
 
 # Australia
 
@@ -99,6 +115,12 @@ save(joinpath(basepath, "images/mass_and_extinction.png"), fig)
 
 # Individual subset plots
 
+fig = plot_extinctions(subsets.australia;
+    colordata=:classNum,
+    trend=trends.australia,
+    # legend=titlecase.(classes) .=> 1:3,
+)
+save(joinpath(basepath, "images/australia_mass_and_extinction.png"), fig)
 # plot_extinctions(subsets.australian_continent.df)
 # plot_extinctions(subsets.australian_islands.df)
 
@@ -135,7 +157,7 @@ else
 end
 
 fig = Figure()
-ax = Axis(fig[1, 1]; 
+ax = Axis(fig[1, 1];
     xlabel="Mass",
     xticks = (log.(10 .^ (0:6)), ["1g", "10g", "100g", "1Kg", "10Kg", "100Kg", "1Mg"])
 )
