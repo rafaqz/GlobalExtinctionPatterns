@@ -99,6 +99,15 @@ fig = plot_subsets(small_layout, subsets, trends;
 )
 save(joinpath(basepath, "images/mass_and_extinction_splits.png"), fig)
 
+foreach(small_layout) do name
+    fig = plot_extinctions(subsets[name];
+        colordata=:classNum,
+        trend=trends[name],
+        legend=titlecase.(classes) .=> 1:3,
+    )
+    save(joinpath(basepath, "images/$(name)_mass_and_extinction.png"), fig)
+end
+
 fig = plot_extinctions(subsets.all;
     colordata=:classNum,
     trend=trends.all,
