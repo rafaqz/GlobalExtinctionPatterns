@@ -1,3 +1,4 @@
+using Revise
 using CSV
 using DataFrames
 using ColorSchemes
@@ -5,7 +6,6 @@ using Colors
 using StatsBase
 using CairoMakie
 # using GLMakie
-using Revise
 
 using GlobalExtinctionPatterns
 
@@ -86,7 +86,7 @@ subset_layout = [
     :inhabited_islands   :inhabited_early   :inhabited_late #:west_indies
     :uninhabited_islands :uninhabited_early :uninhabited_late #nothing
 ]
-fig = plot_subsets(subset_layout, subsets, trends; colordata=:classNum)
+fig = plot_subsets(subset_layout, subsets, trends; legend=(axisnum=1, position=:lt))
 save(joinpath(basepath, "images/mass_and_extinction_subsets.png"), fig)
 
 small_layout = [
@@ -95,6 +95,7 @@ small_layout = [
 ]
 fig = plot_subsets(small_layout, subsets, trends;
     size=(900, 900),
+    legend=(axisnum=3, position=:lt),
 )
 save(joinpath(basepath, "images/mass_and_extinction_splits.png"), fig)
 
@@ -114,11 +115,31 @@ foreach(individual) do name
     save(joinpath(basepath, "images/$(name)_mass_and_extinction.png"), fig)
 end
 
-fig = plot_extinctions(subsets.all.df;
-    size=(600, 600),
+foreach(small_layout) do name
+    fig, ax = plot_extinctions(subsets[name];
+        colordata=:classNum,
+        trend=trends[name],
+        title=subsets[name].title
+    )
+    axislegend(ax; position=:lt)
+    save(joinpath(basepath, "images/$(name)_mass_and_extinction.png"), fig)
+end
+
+class_layout = [
+    :birds :mammals :reptiles
+]
+fig = plot_subsets(class_layout, subsets, trends; 
+    size=(1000, 700),
+    legend=(axisnum=1, position=:lt),
+)
+save(joinpath(basepath, "images/class_mass_and_extinction.png"), fig)
+
+fig, _ = plot_extinctions(subsets.all.df;
+    size=(800, 800),
     colordata=:classNum,
     trend=trends.all,
 )
+fig
 save(joinpath(basepath, "images/global_mass_and_extinction.png"), fig)
 
 # Australia
