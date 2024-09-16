@@ -19,6 +19,7 @@ function load_mass_table(path=joinpath(basepath, "data/extinct_species_mass.csv"
     weigelt_csv = "/home/raf/Data/Extinction/Islands/Weigelt/Weigelt_etal_2013_PNAS_islanddata.csv",
     heinen_csv = "/home/raf/PhD/Mascarenes/MauritiusExtinctions/tables/Heinen_extinct_terrestrial_vertebrates.csv",
 )
+    @show classes
     if isfile(path)
         s1 = CSV.read(path, DataFrame)
     else
@@ -32,7 +33,7 @@ function load_mass_table(path=joinpath(basepath, "data/extinct_species_mass.csv"
         x -> filter(x) do row
             !ismissing(row.kingdomName) &&
             row.kingdomName == "ANIMALIA" &&
-            row.className in classes && # No fish or molluscs 
+            (isnothing(classes) || row.className in classes) && # No fish or molluscs 
             row.systems != "Marine" && # No marine species like seals or whales
             true # Lets us comment out any line above without breaking things
         end

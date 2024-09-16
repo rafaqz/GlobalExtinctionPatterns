@@ -3,8 +3,8 @@ using DataFrames
 using ColorSchemes
 using Colors
 using StatsBase
-# using CairoMakie
-using GLMakie
+using CairoMakie
+# using GLMakie
 using Revise
 
 using GlobalExtinctionPatterns
@@ -94,24 +94,30 @@ small_layout = [
     :uninhabited_early :uninhabited_late #nothing
 ]
 fig = plot_subsets(small_layout, subsets, trends;
-    colordata=:classNum,
-    legend=1:3 .=> titlecase.(classes),
+    size=(900, 900),
 )
 save(joinpath(basepath, "images/mass_and_extinction_splits.png"), fig)
 
-foreach(small_layout) do name
-    fig = plot_extinctions(subsets[name];
-        colordata=:classNum,
+individual = [
+    :inhabited_early   :inhabited_late 
+    :uninhabited_early :uninhabited_late
+    :mascarenes        :australia
+    :all               :hawaiian_islands
+]
+foreach(individual) do name
+    fig, ax = plot_extinctions(subsets[name].df;
+        size=(540, 600),
         trend=trends[name],
-        legend=titlecase.(classes) .=> 1:3,
+        title=subsets[name].title
     )
+    axislegend(ax; position=:lt)
     save(joinpath(basepath, "images/$(name)_mass_and_extinction.png"), fig)
 end
 
-fig = plot_extinctions(subsets.all;
+fig = plot_extinctions(subsets.all.df;
+    size=(600, 600),
     colordata=:classNum,
     trend=trends.all,
-    legend=titlecase.(classes) .=> 1:3,
 )
 save(joinpath(basepath, "images/global_mass_and_extinction.png"), fig)
 
@@ -127,6 +133,7 @@ save(joinpath(basepath, "images/global_mass_and_extinction.png"), fig)
 fig = plot_extinctions(subsets.australia;
     colordata=:classNum,
     trend=trends.australia,
+    size=
     # legend=titlecase.(classes) .=> 1:3,
 )
 save(joinpath(basepath, "images/australia_mass_and_extinction.png"), fig)

@@ -5,6 +5,7 @@ using DataFrames
 using JSON3
 using CairoMakie
 using GBIF2
+using StatsBase
 CairoMakie.activate!()
 
 using GlobalExtinctionPatterns
@@ -14,8 +15,9 @@ datapath = joinpath(basepath, "data")
 imagepath = joinpath(basepath, "images")
 cause_labels = GlobalExtinctionPatterns.cause_labels
 
-mass_df = load_mass_table()
 classes = ["AVES", "MAMMALIA", "REPTILIA"]
+mass_df = load_mass_table(; classes=nothing)
+
 
 iucn_threats_json_path = joinpath(datapath, "iucn_threats.json")
 iucn_threats_dict = JSON3.read(iucn_threats_json_path, Dict{String,Any})
