@@ -6,9 +6,23 @@ using JSON3
 using CairoMakie
 using GBIF2
 using StatsBase
-CairoMakie.activate!()
 
 using GlobalExtinctionPatterns
+
+cause_labels = [
+    "Residential & commercial development",
+    "Agriculture & aquaculture",
+    "Energy production & mining",
+    "Transportation & service corridors",
+    "Biological resource use",
+    "Human intrusions & disturbance",
+    "Natural system modifications",
+    "Invasive & other problematic species, genes & diseases",
+    "Pollution",
+     "Geological events",
+     "Climate change & severe weather",
+     "Other options",
+]
 
 basepath = GlobalExtinctionPatterns.basepath
 datapath = joinpath(basepath, "data")
@@ -17,7 +31,6 @@ cause_labels = GlobalExtinctionPatterns.cause_labels
 
 classes = ["AVES", "MAMMALIA", "REPTILIA"]
 mass_df = load_mass_table(; classes=nothing)
-
 
 iucn_threats_json_path = joinpath(datapath, "iucn_threats.json")
 iucn_threats_dict = JSON3.read(iucn_threats_json_path, Dict{String,Any})
@@ -59,8 +72,8 @@ p = findfirst(==("Pollution"), cause_labels)
 selected_threats = [i, b, a, r, t, n, d, e, p]
 
 sub = :mascarenes
-sub = :mascarenes
 sub = :all
+sub = :birds
 normalise = false
 fig, ax = let
     df = subsets[sub].df
