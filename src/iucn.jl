@@ -30,3 +30,29 @@ function get_flat_threats(threats_dict)
         end
     end |> Iterators.flatten |> collect |> DataFrame
 end
+
+
+function get_threat_codes(df, datapath)
+    iucn_threats_json_path = joinpath(datapath, "iucn_threats.json")
+    iucn_threats_dict = JSON3.read(iucn_threats_json_path, Dict{String,Any})
+
+    flat_threats = get_flat_threats(iucn_threats_dict)
+    # Attach ICUN data to threats records with a left join
+    # TODO some rows added here with leftjoin
+    flat_threats_with_assesment = leftjoin(flat_threats, df; 
+        on=:name => :scientificName
+    )
+    grouped_codes = Dict{String,Any}()
+
+    allcodes = union(flat_threats_with_assesment.name .=> parse.(Int, first.(split.(flat_threats_with_assesment.code, '.'))))
+    for (k, v) in allcodes
+        if haskey(grouped_codes, k)
+            push!(grouped_codes[k], v)
+        else
+            grouped_codes[k] = [v]
+        end
+    end
+    return map(df.scientificName) do name
+        get(grouped_codes, name, Int[])
+    end
+end

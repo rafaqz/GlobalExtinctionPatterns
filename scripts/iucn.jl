@@ -9,21 +9,6 @@ using StatsBase
 
 using GlobalExtinctionPatterns
 
-cause_labels = [
-    "Residential & commercial development",
-    "Agriculture & aquaculture",
-    "Energy production & mining",
-    "Transportation & service corridors",
-    "Biological resource use",
-    "Human intrusions & disturbance",
-    "Natural system modifications",
-    "Invasive & other problematic species, genes & diseases",
-    "Pollution",
-     "Geological events",
-     "Climate change & severe weather",
-     "Other options",
-]
-
 basepath = GlobalExtinctionPatterns.basepath
 datapath = joinpath(basepath, "data")
 imagepath = joinpath(basepath, "images")
@@ -31,32 +16,9 @@ cause_labels = GlobalExtinctionPatterns.cause_labels
 
 classes = ["AVES", "MAMMALIA", "REPTILIA"]
 mass_df = load_mass_table(; classes=nothing)
-
-iucn_threats_json_path = joinpath(datapath, "iucn_threats.json")
-iucn_threats_dict = JSON3.read(iucn_threats_json_path, Dict{String,Any})
-
-flat_threats = get_flat_threats(iucn_threats_dict)
-# Attach ICUN data to threats records with a left join
-# TODO some rows added here with leftjoin
-flat_threats_with_assesment = leftjoin(flat_threats, mass_df; 
-    on=:name => :scientificName
-)
-grouped_codes = Dict{String,Any}()
-
-allcodes = union(flat_threats_with_assesment.name .=> parse.(Int, first.(split.(flat_threats_with_assesment.code, '.'))))
-for (k, v) in allcodes
-    if haskey(grouped_codes, k)
-        push!(grouped_codes[k], v)
-    else
-        grouped_codes[k] = [v]
-    end
-end
-species_threat_codes = map(mass_df.scientificName) do name
-    get(grouped_codes, name, Int[])
-end
-mass_df.threat_codes = species_threat_codes
-
+mass_df.threat_codes = get_threat_codes(mass_df, datapath)
 subsets = get_subsets(mass_df)
+
 # Order threats for a nice color progression
 # We omit "Climate & weather", "Geological events" 
 # and "Other options" for simplicity

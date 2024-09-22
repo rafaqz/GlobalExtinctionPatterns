@@ -6,6 +6,7 @@ using GBIF2
 using GLM
 using Loess
 using Makie
+using JSON3
 using StaticArrays
 using Statistics
 using StatsBase
@@ -22,7 +23,7 @@ export load_mass_trend
 
 export get_subsets
 
-export get_flat_threats
+export get_flat_threats, get_threat_codes
 
 const basepath = realpath(joinpath(@__DIR__, ".."))
 

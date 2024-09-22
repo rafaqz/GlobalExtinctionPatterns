@@ -90,7 +90,9 @@ function plot_extinctions!(ax::Axis, df;
         Makie.lines!(ax, us, vs; label="Loess regression", color=(:black, 0.8))
     elseif !ismissing(trend.model) && trend.r2 != -Inf # Use the trend curve
         minx, maxx = extrema(xs)
-        ax.title = "$title: $(trend.class)"
+        if title != "" 
+            ax.title = title
+        end
         # Fix the log scale
         trend_predictions = predict(trend.model, (; x=0:maxx-minx); 
             interval=:confidence, 
@@ -130,14 +132,15 @@ function plot_subsets(subset_layout, subsets, trends;
             ylims!(ax, (1.0, 1e6))
         else
             sub = subsets[key]
+            @show sub.title
             trend = trends[key]
             ax = Axis(fig[Tuple(I)...]; 
-                title="$(sub.title) : $(trend.class)", 
                 ax_kw...
             )
             I[1] == Base.size(subset_layout, 1) || hidexdecorations!(ax; grid=false)
             I[2] == 1 || hideydecorations!(ax; grid=false)
             plot_extinctions!(ax, sub.df;
+                title="$(sub.title) : $(trend.class)", 
                 legend=Tuple(I) == (1, 1),
                 names=:tooltip,
                 trend,
@@ -163,6 +166,5 @@ function plot_subsets(subset_layout, subsets, trends;
     if !isnothing(legend)
         axislegend(axs[legend.axisnum]; position=legend.position)
     end
-    fig[0, :] = Label(fig, "Patterns of mass, extinction date, and human habitation", fontsize=20)
     return fig
 end

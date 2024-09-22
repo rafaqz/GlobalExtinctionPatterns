@@ -10,9 +10,11 @@ using CairoMakie
 using GlobalExtinctionPatterns
 
 basepath = GlobalExtinctionPatterns.basepath
+datapath = joinpath(basepath, "data")
 classes = ["AVES", "MAMMALIA", "REPTILIA"]
 
 mass_df = load_mass_table(; classes)
+mass_df.threat_codes = get_threat_codes(mass_df, datapath)
 
 # using TerminalPager
 # mass_df |> pager
@@ -21,57 +23,13 @@ mass_df = load_mass_table(; classes)
 mass_df.classNum = collect(map(x -> findfirst(==(x), intersect(classes, mass_df.className)) , mass_df.className))
 
 # Inspect the data
-sort(mass_df.Location |> countmap |> pairs |> collect; by=last)
-sort(mass_df.Archipelago |> countmap |> pairs |> collect; by=last)
-sort(mass_df.SuperArchipelago |> countmap |> pairs |> collect; by=last)
-sort(collect(mass_df.Archipelago |> countmap); by=last)
-
+# sort(mass_df.Location |> countmap |> pairs |> collect; by=last)
+# sort(mass_df.Archipelago |> countmap |> pairs |> collect; by=last)
+# sort(mass_df.SuperArchipelago |> countmap |> pairs |> collect; by=last)
+# sort(collect(mass_df.Archipelago |> countmap); by=last)
 
 # Subsetting #################################################################3
-
-not_mauris = :GBIFSpecies => ByRow(!in(("Chenonetta finschi", "Tribonyx hodgenorum")))
-subset_queries = (;
-    all=(title="All colonised", query=()),
-    birds=(title="All colonised", query=(:className => ByRow(==("AVES")),)),
-    mammals=(title="All colonised", query=(:className => ByRow(==("MAMMALIA")),)),
-    reptiles=(title="All colonised", query=(:className => ByRow(==("REPTILIA")),)),
-    islands=(title="All Islands", query=(:isisland,)),
-    continents=(title="Continents", query=(:isisland => .!,)),
-    inhabited_islands=(title="Inhabited", query=(:isisland, :wasuninhabited => .!,)),
-    uninhabited_islands=(title="Uninhabited", query=(:isisland, :wasuninhabited,)),
-    indian_ocean=(title="Indian ocean", query=(:SuperArchipelago=>ByRow(==("Indian Ocean")),)),
-    mascarenes=(title="Mascarenes", query=(:Archipelago=>ByRow(==("Mascarenes")),)),
-    not_mascarenes=(title="Not Mascarenes", query=(:Archipelago=>ByRow(!=("Mascarenes")),)),
-    non_mascarene_uninhabited=(title="Non-Mascarene Uninhabited", query=(:isisland, :wasuninhabited, :Archipelago=>ByRow(!=("Mascarenes")),)),
-    islands_early=(title="All Early Colonisation", query=(:isisland, :colonised=>ByRow(<(1750)),)),
-    islands_late=(title="All Late Colonisation", query=(not_mauris, :isisland, :colonised=>ByRow(>=(1750)),)),
-    inhabited_early=(title="Inhabited Early Colonisation", query=(:isisland, :wasuninhabited => .!, :colonised=>ByRow(<(1750)),)),
-    inhabited_late=(title="Inhabited Late Colonisation", query=(not_mauris, :isisland, :wasuninhabited => .!, :colonised=>ByRow(>=(1750)),)),
-    uninhabited_early=(title="Uninhabited Early Colonisation", query=(:isisland, :wasuninhabited, :colonised=>ByRow(<(1750)),)),
-    uninhabited_late=(title="Uninhabited Late Colonisation", query=(not_mauris, :isisland, :wasuninhabited, :colonised=>ByRow(>=(1750)),)),
-
-    australian_continent=(title="Australian Continent", query=(:isisland => .!, :SuperArchipelago=>ByRow(==("Australia")),)),
-    australian_islands=(title="Australian Islands", query=(:isisland, :SuperArchipelago=>ByRow(==("Australia")),)),
-    australian_inhabited_islands=(title="Australian Inhabited Islands", query=(:isisland, :wasuninhabited => .!, :SuperArchipelago=>ByRow(==("Australia")),)),
-    australian_uninhabited_islands=(title="Australian Uninhabited Islands", query=(:isisland, :wasuninhabited, :SuperArchipelago=>ByRow(==("Australia")),)),
-
-    mauritius=(title="Mauritius", query=(:Location=>ByRow(==("Mauritius")),)),
-    reunion=(title="Reunion", query=(:Location=>ByRow(==("Reunion")),)),
-    rodrigues=(title="Rodrigues", query=(:Location=>ByRow(==("Rodrigues")),)),
-    australia=(title="Australia", query=(:SuperArchipelago=>ByRow(==("Australia")),)),
-    new_zealand=(title="New Zealand", query=(:SuperArchipelago=>ByRow(==("New Zealand")),)),
-    st_helena=(title="St Helena", query=(:SuperArchipelago=>ByRow(==("St Helena")),)),
-    west_indies=(title="West Indies", query=(:SuperArchipelago=>ByRow(==("West Indies")),)),
-    hawaiian_islands=(title="Hawaiian Islands", query=(:Archipelago=>ByRow(==("Hawaiian Islands")),)),
-    polynesia=(title="Polynesia", query=(:SuperArchipelago=>ByRow(==("Polynesia")),)),
-    micronesia=(title="Micronesia", query=(:SuperArchipelago=>ByRow(==("Micronesia")),)),
-    galapagos=(title="Galapagos", query=(:Archipelago=>ByRow(==("Galapagos")),)),
-)
-
-subsets = map(subset_queries) do qs
-    df = subset(mass_df, qs.query...; skipmissing=true)
-    merge(qs, (; df))
-end
+subsets = get_subsets(mass_df)
 
 trends = map(subsets) do (; df)
     xs, ys = df.yearLastSeen_cleaned, log.(df.EstimatedMass)
@@ -98,6 +56,18 @@ fig = plot_subsets(small_layout, subsets, trends;
     legend=(axisnum=3, position=:lt),
 )
 save(joinpath(basepath, "images/mass_and_extinction_splits.png"), fig)
+
+cause_layout = [
+    :invasive_caused :human_caused :lcc_caused
+    # :invasive_caused_islands :human_caused_islands :lcc_caused_islands
+    # :invasive_caused_inhabited :human_caused_inhabited :lcc_caused_inhabited
+    # :invasive_caused_uninhabited :human_caused_uninhabited :lcc_caused_uninhabited
+]
+fig = plot_subsets(cause_layout, subsets, trends;
+    size=(1000, 500),
+    # legend=(axisnum=3, position=:lt),
+)
+save(joinpath(basepath, "images/mass_and_extinction_causes.png"), fig)
 
 individual = [
     :inhabited_early   :inhabited_late 

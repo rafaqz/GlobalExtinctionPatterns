@@ -1,7 +1,46 @@
+
+const cause_labels = [
+    "Residential & commercial"
+    "Agriculture & aquaculture"
+    "Energy production & mining"
+    "Transport corridors"
+    "Biological resource use"
+    "Human disturbance"
+    "Natural system modifications"
+    "Invasive & diseases"
+    "Pollution"
+    "Geological events"
+    "Climate & weather"
+    "Other options"
+]
+
+INVASIVE_CAUSED = findfirst(==("Invasive & diseases"), cause_labels)
+HUMAN_CAUSED = findfirst(==("Biological resource use"), cause_labels)
+LCC_CAUSED = map(s -> findfirst(==(s), cause_labels), [
+    "Residential & commercial"
+    "Agriculture & aquaculture"
+    "Energy production & mining"
+    "Transport corridors"
+    "Human disturbance"
+    "Natural system modifications"
+])
+
 function get_subsets(full_df;
     classes = ["AVES", "MAMMALIA", "REPTILIA"],
     not_mauris = :GBIFSpecies => ByRow(!in(("Chenonetta finschi", "Tribonyx hodgenorum"))),
     subset_queries = (;
+        invasive_caused=(title="Invasive caused", query=(:threat_codes => ByRow(t -> INVASIVE_CAUSED in t),)), 
+        human_caused=(title="Human resource use caused", query=(:threat_codes => ByRow(t -> HUMAN_CAUSED in t),)), 
+        lcc_caused=(title="Land cover change caused", query=(:threat_codes => ByRow(t -> any(c -> c in t, LCC_CAUSED)),)), 
+        invasive_caused_islands=(title="Invasive caused islands", query=(:isisland, :threat_codes => ByRow(t -> INVASIVE_CAUSED in t),)), 
+        human_caused_islands=(title="Human resource use caused islands", query=(:isisland, :threat_codes => ByRow(t -> HUMAN_CAUSED in t),)), 
+        lcc_caused_islands=(title="Land cover change caused islands", query=(:isisland, :threat_codes => ByRow(t -> any(c -> c in t, LCC_CAUSED)),)), 
+        invasive_caused_uninhabited=(title="Invasive caused", query=(:isisland, :wasuninhabited, :threat_codes => ByRow(t -> INVASIVE_CAUSED in t),)), 
+        human_caused_uninhabited=(title="Human resource use caused", query=(:isisland, :wasuninhabited, :threat_codes => ByRow(t -> HUMAN_CAUSED in t),)), 
+        lcc_caused_uninhabited=(title="Land cover change caused", query=(:isisland, :wasuninhabited, :threat_codes => ByRow(t -> any(c -> c in t, LCC_CAUSED)),)), 
+        invasive_caused_inhabited=(title="Invasive caused", query=(:isisland, :wasuninhabited => .!, :threat_codes => ByRow(t -> INVASIVE_CAUSED in t),)), 
+        human_caused_inhabited=(title="Human resource use caused", query=(:isisland, :wasuninhabited => .!, :threat_codes => ByRow(t -> HUMAN_CAUSED in t),)), 
+        lcc_caused_inhabited=(title="Land cover change caused", query=(:isisland, :wasuninhabited => .!, :threat_codes => ByRow(t -> any(c -> c in t, LCC_CAUSED)),)), 
         all=(title="All colonised", query=()),
         birds=(title="All colonised", query=(:className => ByRow(==("AVES")),)),
         mammals=(title="All colonised", query=(:className => ByRow(==("MAMMALIA")),)),
