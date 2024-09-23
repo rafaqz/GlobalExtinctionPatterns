@@ -23,7 +23,7 @@ export load_mass_trend
 
 export get_subsets
 
-export get_flat_threats, get_threat_codes
+export get_flat_threats, get_threat_codes, get_threat_groups
 
 const basepath = realpath(joinpath(@__DIR__, ".."))
 

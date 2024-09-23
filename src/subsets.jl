@@ -14,8 +14,8 @@ const cause_labels = [
     "Other options"
 ]
 
-INVASIVE_CAUSED = findfirst(==("Invasive & diseases"), cause_labels)
-HUMAN_CAUSED = findfirst(==("Biological resource use"), cause_labels)
+INVASIVE_CAUSED = ["8.1.1", "8.1.2", "8.2.1", "8.2.2", "8.4.1", "8.4.2"]
+HUMAN_CAUSED = ["5.1.1", "5.1.2", "5.1.4"]
 LCC_CAUSED = map(s -> findfirst(==(s), cause_labels), [
     "Residential & commercial"
     "Agriculture & aquaculture"
@@ -28,19 +28,22 @@ LCC_CAUSED = map(s -> findfirst(==(s), cause_labels), [
 function get_subsets(full_df;
     classes = ["AVES", "MAMMALIA", "REPTILIA"],
     not_mauris = :GBIFSpecies => ByRow(!in(("Chenonetta finschi", "Tribonyx hodgenorum"))),
+    human_caused = :threat_codes => ByRow(t -> any(h -> h in t, HUMAN_CAUSED)),
+    invasive_caused = :threat_codes => ByRow(t -> any(h -> h in t, INVASIVE_CAUSED)),
+    lcc_caused = :threat_groups => ByRow(t -> any(c -> c in t, LCC_CAUSED)),
     subset_queries = (;
-        invasive_caused=(title="Invasive caused", query=(:threat_codes => ByRow(t -> INVASIVE_CAUSED in t),)), 
-        human_caused=(title="Human resource use caused", query=(:threat_codes => ByRow(t -> HUMAN_CAUSED in t),)), 
-        lcc_caused=(title="Land cover change caused", query=(:threat_codes => ByRow(t -> any(c -> c in t, LCC_CAUSED)),)), 
-        invasive_caused_islands=(title="Invasive caused islands", query=(:isisland, :threat_codes => ByRow(t -> INVASIVE_CAUSED in t),)), 
-        human_caused_islands=(title="Human resource use caused islands", query=(:isisland, :threat_codes => ByRow(t -> HUMAN_CAUSED in t),)), 
-        lcc_caused_islands=(title="Land cover change caused islands", query=(:isisland, :threat_codes => ByRow(t -> any(c -> c in t, LCC_CAUSED)),)), 
-        invasive_caused_uninhabited=(title="Invasive caused", query=(:isisland, :wasuninhabited, :threat_codes => ByRow(t -> INVASIVE_CAUSED in t),)), 
-        human_caused_uninhabited=(title="Human resource use caused", query=(:isisland, :wasuninhabited, :threat_codes => ByRow(t -> HUMAN_CAUSED in t),)), 
-        lcc_caused_uninhabited=(title="Land cover change caused", query=(:isisland, :wasuninhabited, :threat_codes => ByRow(t -> any(c -> c in t, LCC_CAUSED)),)), 
-        invasive_caused_inhabited=(title="Invasive caused", query=(:isisland, :wasuninhabited => .!, :threat_codes => ByRow(t -> INVASIVE_CAUSED in t),)), 
-        human_caused_inhabited=(title="Human resource use caused", query=(:isisland, :wasuninhabited => .!, :threat_codes => ByRow(t -> HUMAN_CAUSED in t),)), 
-        lcc_caused_inhabited=(title="Land cover change caused", query=(:isisland, :wasuninhabited => .!, :threat_codes => ByRow(t -> any(c -> c in t, LCC_CAUSED)),)), 
+        invasive_caused=(title="Invasive caused", query=(invasive_caused,)),
+        human_caused=(title="Human hunting caused", query=(human_caused,)),
+        lcc_caused=(title="Land cover change caused", query=(lcc_caused,)),
+        invasive_caused_islands=(title="Invasive caused islands", query=(:isisland, invasive_caused,)),
+        human_caused_islands=(title="Human hunting caused islands", query=(:isisland, human_caused,)),
+        lcc_caused_islands=(title="Land cover change caused islands", query=(:isisland, lcc_caused,)),
+        invasive_caused_uninhabited=(title="Invasive caused", query=(:isisland, :wasuninhabited, invasive_caused,)),
+        human_caused_uninhabited=(title="Human hunting caused", query=(:isisland, :wasuninhabited, human_caused,)),
+        lcc_caused_uninhabited=(title="Land cover change caused", query=(:isisland, :wasuninhabited, lcc_caused,)),
+        invasive_caused_inhabited=(title="Invasive caused", query=(:isisland, :wasuninhabited => .!, invasive_caused,)),
+        human_caused_inhabited=(title="Human hunting caused", query=(:isisland, :wasuninhabited => .!, human_caused,)),
+        lcc_caused_inhabited=(title="Land cover change caused", query=(:isisland, :wasuninhabited => .!, lcc_caused,)),
         all=(title="All colonised", query=()),
         birds=(title="All colonised", query=(:className => ByRow(==("AVES")),)),
         mammals=(title="All colonised", query=(:className => ByRow(==("MAMMALIA")),)),

@@ -14,6 +14,7 @@ datapath = joinpath(basepath, "data")
 classes = ["AVES", "MAMMALIA", "REPTILIA"]
 
 mass_df = load_mass_table(; classes)
+mass_df.threat_groups = get_threat_groups(mass_df, datapath)
 mass_df.threat_codes = get_threat_codes(mass_df, datapath)
 
 # using TerminalPager
@@ -87,7 +88,6 @@ end
 
 foreach(small_layout) do name
     fig, ax = plot_extinctions(subsets[name];
-        colordata=:classNum,
         trend=trends[name],
         title=subsets[name].title
     )
@@ -106,7 +106,6 @@ save(joinpath(basepath, "images/class_mass_and_extinction.png"), fig)
 
 fig, _ = plot_extinctions(subsets.all.df;
     size=(800, 800),
-    colordata=:classNum,
     trend=trends.all,
 )
 fig

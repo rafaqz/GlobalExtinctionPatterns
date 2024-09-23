@@ -58,6 +58,7 @@ function plot_extinctions!(ax::Axis, df;
             colormap=:linear_bmy_10_95_c71_n256,
             colorrange=(0, 4),
             label=class,
+            alpha=0.7,
             inspector_label=(_, i, _) -> "$(df_c.GBIFSpecies[i])\nClass: $(df_c.className[i])\nIsland: $(df_c.Location[i])\nArea: $(df_c.Area[i])\nMass: $(ys[i])\nExtinct: $(xs[i])",
         )
     end
