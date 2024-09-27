@@ -26,7 +26,8 @@ function plot_extinctions!(fig::Figure, df;
         yscale=log10,
         title, 
         xlabel, 
-        ylabel
+        ylabel,
+        xticks=1500:100:2000, 
     )
     plot_extinctions!(ax, df; kw...)
     return ax
@@ -48,6 +49,7 @@ function plot_extinctions!(ax::Axis, df;
 )
     xlims!(ax, xlims)
     ylims!(ax, ylims)
+    Makie.hidespines!(ax)
     for (c, class) in enumerate(classes)
         df_c = subset(df, :className => ByRow(==(class)))
         xs, ys = df_c.yearLastSeen_cleaned, df_c.EstimatedMass
@@ -119,12 +121,12 @@ function plot_subsets(subset_layout, subsets, trends;
     size=(1600, 900),
     legend=nothing,
 )
-    kw = (; yscale=log10, xlabel="Year last seen", ylabel="Mass")
     fig = Figure(; size);
     ax_kw = (; 
         yscale=log10, 
         xlabel="Year last seen", 
         ylabel="Mass",
+        xticks=1500:100:2000, 
     )
     axs = map(subset_layout, CartesianIndices(subset_layout)) do key, I
         if isnothing(key)
@@ -145,10 +147,9 @@ function plot_subsets(subset_layout, subsets, trends;
                 legend=Tuple(I) == (1, 1),
                 names=:tooltip,
                 trend,
-                kw...
+                ax_kw...
             )
         end
-        Makie.hidespines!(ax)
         ax
     end
     # if legend

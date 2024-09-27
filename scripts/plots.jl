@@ -53,7 +53,7 @@ small_layout = [
     :uninhabited_early :uninhabited_late #nothing
 ]
 fig = plot_subsets(small_layout, subsets, trends;
-    size=(900, 900),
+    size=(1000, 750),
     legend=(axisnum=3, position=:lt),
 )
 save(joinpath(basepath, "images/mass_and_extinction_splits.png"), fig)
