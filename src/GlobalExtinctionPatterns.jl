@@ -4,6 +4,7 @@ using CSV
 using DataFrames
 using GBIF2
 using GLM
+using KernelDensity
 using Loess
 using Makie
 using JSON3
@@ -23,7 +24,7 @@ export load_mass_trend
 
 export get_subsets
 
-export get_flat_threats, get_threat_codes, get_threat_groups
+export get_flat_threats, get_threat_codes, get_threat_groups, plot_threat_density!
 
 const basepath = realpath(joinpath(@__DIR__, ".."))
 

@@ -18,7 +18,7 @@ function get_flat_threats(threats_dict)
     threatkeys = nothing
     for (k, v) in threats_dict
         if length(v) > 0
-            threatkeys = Tuple(Symbol.(keys(v[1]))) 
+            threatkeys = Tuple(Symbol.(keys(v[1])))
         end
     end
     isnothing(threatkeys) && return missing
@@ -38,7 +38,7 @@ function get_threat_groups(df, datapath)
     flat_threats = get_flat_threats(iucn_threats_dict)
     # Attach ICUN data to threats records with a left join
     # TODO some rows added here with leftjoin
-    flat_threats_with_assesment = leftjoin(flat_threats, df; 
+    flat_threats_with_assesment = leftjoin(flat_threats, df;
         on=:name => :scientificName
     )
     grouped_codes = Dict{String,Vector{Int}}()
@@ -63,7 +63,7 @@ function get_threat_codes(df, datapath)
     flat_threats = get_flat_threats(iucn_threats_dict)
     # Attach ICUN data to threats records with a left join
     # TODO some rows added here with leftjoin
-    flat_threats_with_assesment = leftjoin(flat_threats, df; 
+    flat_threats_with_assesment = leftjoin(flat_threats, df;
         on=:name => :scientificName
     )
     grouped_codes = Dict{String,Vector{String}}()
@@ -78,4 +78,78 @@ function get_threat_codes(df, datapath)
     return map(df.scientificName) do name
         get(grouped_codes, name, String[])
     end
+end
+
+function plot_threat_density!(ax, df;
+    normalise=false, classes, colors
+)
+    threat_groups = map(1:12) do threat_code
+        subset(df,
+            :className => ByRow(in(classes)),
+            :threat_groups => ByRow(tcs -> threat_code in tcs),
+        )
+    end
+    labels = ["Invasives", "Human hunting", "Land cover change", "Other",]
+    group_queries = (
+        :threat_codes => ByRow(x -> any(c -> c in x, INVASIVE_CAUSED)),
+        :threat_codes => ByRow(x -> any(c -> c in x, HUMAN_CAUSED)),
+        :threat_codes => ByRow(x -> any(c -> c in x, LCC_CAUSED)),
+        :threat_codes => ByRow(x -> any(c -> c in x, OTHER_CAUSED)),
+    )
+    groups = map(group_queries) do q
+        subset(df, q)
+    end
+    # selected_threats = eachindex(cause_labels)
+    upper = nothing
+    # k = cause_labels[a]
+    # group = threat_groups[a]
+    all_years = collect(skipmissing(df.yearLastSeen_cleaned))
+    kde_kw = (; boundary=(1350, 2025), npoints=2025-1350+1, bandwidth=25)
+    u_all = kde(all_years; kde_kw...)
+    group_stats = map(groups) do group
+        years = collect(skipmissing(group.yearLastSeen_cleaned))
+        u = kde(years; kde_kw...)
+        adjusted_density = u.density .* length(years)
+        if isnothing(upper)
+            upper = adjusted_density
+            lower = adjusted_density .* 0
+        else
+            lower = upper
+            upper = upper .+ adjusted_density
+        end
+        (; lower, upper, kde=u)
+    end
+    group_stats = map(group_stats) do (; lower, upper, kde)
+        if normalise
+            (;
+                lower=lower ./ last(group_stats).upper .- 0.001,
+                upper=upper ./ last(group_stats).upper,
+                kde,
+            )
+        else
+            (;
+                lower=lower .- 0.001,
+                upper=upper,
+                kde,
+            )
+        end
+    end
+    length(group_stats)
+    i = 2
+    for i in reverse(eachindex(groups))
+        s = group_stats[i]
+        Makie.band!(ax, s.kde.x, s.lower, s.upper;
+            label=string(labels[i]),
+            color=(colors[i], 0.95),
+            # strokecolor=get(colors, i/length(selected_threats)), p2_kw...
+        )
+    end
+    if !normalise
+        axislegend(ax; position=(0.1, normalise ? 0.1 : 0.9), framevisible=false)
+    end
+    scatter!(ax, all_years, map(_ -> 0.1, all_years); markersize=15, marker=:vline, color=(:black, 0.25))
+    hidedecorations!(ax; label=false, ticks=false, ticklabels=false)
+    hidespines!(ax)
+    xlims!(ax, (1500, 2024))
+    return ax
 end

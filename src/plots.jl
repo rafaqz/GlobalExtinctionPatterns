@@ -27,7 +27,7 @@ function plot_extinctions!(fig::Figure, df;
         title, 
         xlabel, 
         ylabel,
-        xticks=1500:100:2000, 
+        xticks=1500:250:2000, 
     )
     plot_extinctions!(ax, df; kw...)
     return ax
@@ -126,7 +126,7 @@ function plot_subsets(subset_layout, subsets, trends;
         yscale=log10, 
         xlabel="Year last seen", 
         ylabel="Mass",
-        xticks=1500:100:2000, 
+        xticks=1500:250:2000, 
     )
     axs = map(subset_layout, CartesianIndices(subset_layout)) do key, I
         if isnothing(key)

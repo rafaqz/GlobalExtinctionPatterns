@@ -12,16 +12,22 @@ using GlobalExtinctionPatterns
 basepath = GlobalExtinctionPatterns.basepath
 datapath = joinpath(basepath, "data")
 classes = ["AVES", "MAMMALIA", "REPTILIA"]
+cause_colors = map(i -> get(ColorSchemes.Bay, i/4), 1:4)
 
 mass_df = load_mass_table(; classes)
 mass_df.threat_groups = get_threat_groups(mass_df, datapath)
 mass_df.threat_codes = get_threat_codes(mass_df, datapath)
 
-# using TerminalPager
-# mass_df |> pager
-
 # Add numerical classes for plot colors
 mass_df.classNum = collect(map(x -> findfirst(==(x), intersect(classes, mass_df.className)) , mass_df.className))
+subsets = get_subsets(mass_df)
+trends = map(subsets) do (; df)
+    xs, ys = df.yearLastSeen_cleaned, log.(df.EstimatedMass)
+    classify_trend(xs, ys)
+end
+
+# using TerminalPager
+# mass_df |> pager
 
 # Inspect the data
 # sort(mass_df.Location |> countmap |> pairs |> collect; by=last)
@@ -30,12 +36,6 @@ mass_df.classNum = collect(map(x -> findfirst(==(x), intersect(classes, mass_df.
 # sort(collect(mass_df.Archipelago |> countmap); by=last)
 
 # Subsetting #################################################################3
-subsets = get_subsets(mass_df)
-
-trends = map(subsets) do (; df)
-    xs, ys = df.yearLastSeen_cleaned, log.(df.EstimatedMass)
-    classify_trend(xs, ys)
-end
 
 
 # Mass vs Extinction time plots ####################################################################3
@@ -59,13 +59,14 @@ fig = plot_subsets(small_layout, subsets, trends;
 save(joinpath(basepath, "images/mass_and_extinction_splits.png"), fig)
 
 cause_layout = [
-    :invasive_caused :human_caused :lcc_caused
+    :invasive_caused :human_caused :lcc_caused :other_caused
     # :invasive_caused_islands :human_caused_islands :lcc_caused_islands
     # :invasive_caused_inhabited :human_caused_inhabited :lcc_caused_inhabited
     # :invasive_caused_uninhabited :human_caused_uninhabited :lcc_caused_uninhabited
 ]
 fig = plot_subsets(cause_layout, subsets, trends;
-    size=(1000, 500),
+    size=(1000, 400),
+    # colors=cause_colors[1:3]
     # legend=(axisnum=3, position=:lt),
 )
 save(joinpath(basepath, "images/mass_and_extinction_causes.png"), fig)
