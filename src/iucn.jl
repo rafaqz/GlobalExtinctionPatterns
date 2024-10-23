@@ -145,11 +145,15 @@ function plot_threat_density!(ax, df;
         )
     end
     if !normalise
-        axislegend(ax; position=(0.1, normalise ? 0.1 : 0.9), framevisible=false)
+        axislegend(ax;
+            position=(0.1, normalise ? 0.1 : 0.9),
+            framevisible=false,
+        )
     end
-    scatter!(ax, all_years, map(_ -> 0.1, all_years); markersize=15, marker=:vline, color=(:black, 0.25))
-    hidedecorations!(ax; label=false, ticks=false, ticklabels=false)
-    hidespines!(ax)
-    xlims!(ax, (1500, 2024))
+    scatter!(ax, all_years, map(_ -> 0.0, all_years);
+         markersize=30,
+         marker=:vline,
+         color=(:black, 0.30),
+    )
     return ax
 end

@@ -11,6 +11,7 @@ using JSON3
 using StaticArrays
 using Statistics
 using StatsBase
+using ColorSchemes
 
 export classify_trend
 

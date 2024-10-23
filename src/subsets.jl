@@ -17,7 +17,7 @@ const cause_labels = [
 INVASIVE_CAUSED = ["8.1.1", "8.1.2", "8.2.1", "8.2.2", "8.4.1", "8.4.2"]
 HUMAN_CAUSED = ["5.1.1", "5.1.3", "5.1.4"]
 LCC_CAUSED = [
-    "1.1", 
+    "1.1",
     "1.2",
     "1.3",
     "2.1.1", "2.1.2", "2.1.3", "2.1.4",
@@ -61,6 +61,13 @@ OTHER_CAUSED = [
     "12.1",
 ]
 
+function add_threat_categories(df)
+    df.human_thre = subset(df, :threat_codes => ByRow(x -> any(c -> c in x, HUMAN_CAUSED)))
+    df.invasive_thre = subset(df, :threat_codes => ByRow(x -> any(c -> c in x, INVASIVE_CAUSED)))
+    df.lcc_thre = subset(df, :threat_codes => ByRow(x -> any(c -> c in x, LCC_CAUSED)))
+    df.other_thre = subset(df, :threat_codes => ByRow(x -> any(c -> c in x, OTHER_CAUSED)))
+end
+
 function get_subsets(full_df;
     classes = ["AVES", "MAMMALIA", "REPTILIA"],
     not_mauris = :GBIFSpecies => ByRow(!in(("Chenonetta finschi", "Tribonyx hodgenorum"))),
@@ -85,10 +92,10 @@ function get_subsets(full_df;
         human_caused_inhabited=(title="Human hunting caused inhabited", query=(:isisland, :wasuninhabited => .!, human_caused,)),
         lcc_caused_inhabited=(title="Land cover change caused inhabited", query=(:isisland, :wasuninhabited => .!, lcc_caused,)),
         other_caused_inhabited=(title="Other caused inhabited", query=(:isisland, :wasuninhabited => .!, other_caused,)),
-        all=(title="All colonised", query=()),
-        birds=(title="All colonised", query=(:className => ByRow(==("AVES")),)),
-        mammals=(title="All colonised", query=(:className => ByRow(==("MAMMALIA")),)),
-        reptiles=(title="All colonised", query=(:className => ByRow(==("REPTILIA")),)),
+        all=(title="", query=()),
+        birds=(title="Birds", query=(:className => ByRow(==("AVES")),)),
+        mammals=(title="Mammals", query=(:className => ByRow(==("MAMMALIA")),)),
+        reptiles=(title="Reptiles", query=(:className => ByRow(==("REPTILIA")),)),
         islands=(title="All Islands", query=(:isisland,)),
         continents=(title="Continents", query=(:isisland => .!,)),
         inhabited_islands=(title="Inhabited", query=(:isisland, :wasuninhabited => .!,)),

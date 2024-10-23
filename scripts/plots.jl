@@ -53,13 +53,13 @@ small_layout = [
     :uninhabited_early :uninhabited_late #nothing
 ]
 fig = plot_subsets(small_layout, subsets, trends;
-    size=(1000, 750),
+    size=(700, 600),
     legend=(axisnum=3, position=:lt),
 )
 save(joinpath(basepath, "images/mass_and_extinction_splits.png"), fig)
 
 cause_layout = [
-    :invasive_caused :human_caused :lcc_caused :other_caused
+    :invasive_caused :human_caused :lcc_caused
     # :invasive_caused_islands :human_caused_islands :lcc_caused_islands
     # :invasive_caused_inhabited :human_caused_inhabited :lcc_caused_inhabited
     # :invasive_caused_uninhabited :human_caused_uninhabited :lcc_caused_uninhabited
@@ -79,13 +79,23 @@ individual = [
 ]
 foreach(individual) do name
     fig, ax = plot_extinctions(subsets[name].df;
-        size=(540, 600),
+        size=(600, 600),
         trend=trends[name],
         title=subsets[name].title
     )
     axislegend(ax; position=:lt)
     save(joinpath(basepath, "images/$(name)_mass_and_extinction.png"), fig)
 end
+
+fig, ax = plot_extinctions(subsets[:all].df;
+    size=(720, 600),
+    trend=trends[:all],
+    density=false,
+    colormap=:Egypt
+)
+Legend(fig[1, 2], ax; framevisible=false)
+fig
+save(joinpath(basepath, "images/all_mass_and_extinction.png"), fig)
 
 foreach(small_layout) do name
     fig, ax = plot_extinctions(subsets[name];
@@ -100,7 +110,7 @@ class_layout = [
     :birds :mammals :reptiles
 ]
 fig = plot_subsets(class_layout, subsets, trends; 
-    size=(1000, 700),
+    size=(1000, 350),
     legend=(axisnum=1, position=:lt),
 )
 save(joinpath(basepath, "images/class_mass_and_extinction.png"), fig)
