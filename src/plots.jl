@@ -18,7 +18,7 @@ function plot_extinctions!(fig::Figure, df;
     size=nothing,
     title="",
     xlabel="Year last seen",
-    ylabel="Mass",
+    ylabel="Mass (g)",
     classes=["AVES", "MAMMALIA", "REPTILIA"],
     colordata=:colonised,
     colormap=:Egypt,
@@ -135,13 +135,15 @@ function plot_extinctions!(ax::Axis, df;
         vs = exp.(predict(model, us))
         Makie.lines!(ax, us, vs; linewidth=2, label="Loess regression", color=(:black, 0.8))
     elseif !ismissing(trend.model) && trend.r2 != -Inf # Use the trend curve
-        minx = minimum(xs)
+        minx, maxx = extrema(xs)
         plotminx, plotmaxx = minx < 1750 ? (1470, 2030) : (1750, 2030)
         if title != "" 
             ax.title = title
         end
+
         # Fix the log scale
-        trend_predictions = predict(trend.model, (; x=0:plotmaxx-plotminx); 
+        x = plotminx-minx:plotmaxx-minx
+        trend_predictions = predict(trend.model, (; x); 
             interval=:confidence, 
             level=0.95
         )
@@ -156,7 +158,7 @@ function plot_extinctions!(ax::Axis, df;
         )
         translate!(confidence_band, 0, 0, -10)
     end
-    mean_line = Makie.hlines!(ax, exp.(mean(log.(ys))); 
+    mean_line = Makie.hlines!(ax, geomean(ys); 
         linewidth=2, 
         label="Geometric\nmean",
         color=:grey,
@@ -176,10 +178,12 @@ function plot_subsets(subset_layout, subsets, trends;
     legend=nothing,
     xlabel="Year last seen", 
     ylabel="Mass",
+    titlejoin=" ",
     xticks=XTICKS, 
     spinewidth=2, 
+    fonts=(; regular="Arial"),
 )
-    fig = Figure(; size, fonts=(; regular = "arial"));
+    fig = Figure(; size, fonts);
     ax_kw = (; yscale=log10, spinewidth, xlabel, ylabel, xticks,
         xgridwidth=2, ygridwidth=2, 
     )
@@ -193,7 +197,7 @@ function plot_subsets(subset_layout, subsets, trends;
             I[1] == Base.size(subset_layout, 1) || hidexdecorations!(ax; grid=false)
             I[2] == 1 || hideydecorations!(ax; grid=false)
             plot_extinctions!(ax, sub.df;
-                title="$(titlecase(string(sub.title))): $(titlecase(replace(string(trend.class), "_" => " ")))", 
+                title="$(titlecase(string(sub.title))):$(titlejoin)$(titlecase(replace(string(trend.class), "_" => " ")))", 
                 legend=Tuple(I) == (1, 1),
                 names=:tooltip,
                 colormap, trend, ax_kw...

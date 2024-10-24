@@ -1,3 +1,5 @@
+deleteat!(Base.LOAD_PATH, 2:3)
+
 using Revise
 using CSV
 using DataFrames
@@ -25,6 +27,10 @@ trends = map(subsets) do (; df)
     xs, ys = df.yearLastSeen_cleaned, log.(df.EstimatedMass)
     classify_trend(xs, ys)
 end
+
+map(subsets) do (; df)
+    geomean(df.EstimatedMass)
+end |> pairs
 
 # using TerminalPager
 # mass_df |> pager
@@ -55,54 +61,43 @@ small_layout = [
 fig = plot_subsets(small_layout, subsets, trends;
     size=(700, 600),
     legend=(axisnum=3, position=:lt),
+    titlejoin="\n",
 )
 save(joinpath(basepath, "images/mass_and_extinction_splits.png"), fig)
 
 cause_layout = [
     :invasive_caused :human_caused :lcc_caused
-    # :invasive_caused_islands :human_caused_islands :lcc_caused_islands
-    # :invasive_caused_inhabited :human_caused_inhabited :lcc_caused_inhabited
-    # :invasive_caused_uninhabited :human_caused_uninhabited :lcc_caused_uninhabited
 ]
 fig = plot_subsets(cause_layout, subsets, trends;
-    size=(1000, 400),
-    # colors=cause_colors[1:3]
-    # legend=(axisnum=3, position=:lt),
+    size=(1000, 350),
+    legend=(axisnum=3, position=:lt),
 )
 save(joinpath(basepath, "images/mass_and_extinction_causes.png"), fig)
 
 individual = [
-    :inhabited_early   :inhabited_late 
-    :uninhabited_early :uninhabited_late
-    :mascarenes        :australia
-    :all               :hawaiian_islands
+    :inhabited_early
+    :inhabited_late 
+    :uninhabited_early
+    :uninhabited_late
+    :mascarenes
+    :australia
+    :hawaiian_islands
+    :continents
+    :all               
 ]
 foreach(individual) do name
-    fig, ax = plot_extinctions(subsets[name].df;
-        size=(600, 600),
-        trend=trends[name],
-        title=subsets[name].title
+    fig = plot_subsets([name;;], subsets, trends;
+        size=(720, 600),
+        legend=(axisnum=1, position=:lt),
     )
-    axislegend(ax; position=:lt)
     save(joinpath(basepath, "images/$(name)_mass_and_extinction.png"), fig)
 end
 
-fig, ax = plot_extinctions(subsets[:all].df;
-    size=(720, 600),
-    trend=trends[:all],
-    density=false,
-    colormap=:Egypt
-)
-Legend(fig[1, 2], ax; framevisible=false)
-fig
-save(joinpath(basepath, "images/all_mass_and_extinction.png"), fig)
-
 foreach(small_layout) do name
-    fig, ax = plot_extinctions(subsets[name];
-        trend=trends[name],
-        title=subsets[name].title
+    fig = plot_subsets([name;;], subsets, trends;
+        size=(720, 600),
+        legend=(axisnum=1, position=:lt),
     )
-    axislegend(ax; position=:lt)
     save(joinpath(basepath, "images/$(name)_mass_and_extinction.png"), fig)
 end
 
@@ -175,7 +170,7 @@ end
 
 fig = Figure()
 ax = Axis(fig[1, 1];
-    xlabel="Mass",
+    xlabel="Mass (g)",
     xticks = (log.(10 .^ (0:6)), ["1g", "10g", "100g", "1Kg", "10Kg", "100Kg", "1Mg"])
 )
 xlims!(ax, (0, log(1e6)))
