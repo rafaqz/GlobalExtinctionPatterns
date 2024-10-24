@@ -28,7 +28,7 @@ trends = map(subsets) do (; df)
     classify_trend(xs, ys)
 end
 
-map(subsets) do (; df)
+geometric_means = map(subsets) do (; df)
     geomean(df.EstimatedMass)
 end |> pairs
 
