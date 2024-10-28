@@ -29,7 +29,7 @@ export get_flat_threats, get_threat_codes, get_threat_groups, plot_threat_densit
 
 const basepath = realpath(joinpath(@__DIR__, ".."))
 
-include("rigal.jl")
+include("stats.jl")
 include("tables.jl")
 include("gbif.jl")
 include("plots.jl")

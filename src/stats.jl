@@ -1,3 +1,11 @@
+geostd(xs) = exp(std(Iterators.map(log, xs)))
+function geosummary(xs)
+    lxs = map(log, xs)
+    mn = mean(lxs)
+    st = std(lxs)
+    return (mn, st, mean=exp(mn), std=exp(st), lower=exp(mn - 2st), upper=exp(mn + 2st))
+end
+
 function classify_trend(x_init, y;
     significant=0.05,
 )
@@ -62,7 +70,7 @@ end
 #     n = 20
 #     x = range(0, 1, n)
 #     y = rand(n) .+ range(0, 1, n)
-#     trends = (; 
+#     trends = (;
 #         stable = range(0.5, 0.5, n),
 #         constant_increase = range(0, 1, n),
 #         constant_decline = range(1, 0, n),

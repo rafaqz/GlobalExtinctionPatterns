@@ -10,6 +10,7 @@ using CairoMakie
 # using GLMakie
 
 using GlobalExtinctionPatterns
+const GEP = GlobalExtinctionPatterns
 
 basepath = GlobalExtinctionPatterns.basepath
 datapath = joinpath(basepath, "data")
@@ -23,14 +24,22 @@ mass_df.threat_codes = get_threat_codes(mass_df, datapath)
 # Add numerical classes for plot colors
 mass_df.classNum = collect(map(x -> findfirst(==(x), intersect(classes, mass_df.className)) , mass_df.className))
 subsets = get_subsets(mass_df)
+geometric_means = map(subsets) do (; df)
+    geomean(df.EstimatedMass)
+end
+geometric_summary = map(subsets) do (; df)
+    GEP.geosummary(df.EstimatedMass)
+end
+geometric_means |> pairs
+geometric_stds |> pairs
+
+geometric_summary = map(subsets) do m, s
+end
+
 trends = map(subsets) do (; df)
     xs, ys = df.yearLastSeen_cleaned, log.(df.EstimatedMass)
     classify_trend(xs, ys)
 end
-
-geometric_means = map(subsets) do (; df)
-    geomean(df.EstimatedMass)
-end |> pairs
 
 # using TerminalPager
 # mass_df |> pager

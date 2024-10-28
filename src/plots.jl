@@ -111,26 +111,13 @@ function plot_extinctions!(ax::Axis, df;
             inspector_label=(_, i, _) -> "$(df_c.GBIFSpecies[i])\nClass: $(df_c.className[i])\nIsland: $(df_c.Location[i])\nArea: $(df_c.Area[i])\nMass: $(ys[i])\nExtinct: $(xs[i])",
         )
     end
-    # xs, ys = df.yearLastSeen_cleaned, df.EstimatedMass
-    # color = colordata isa Symbol ? getproperty(df, colordata) : colordata
-    # p = Makie.scatter!(ax, xs, ys;
-    #     label="Extinctions",
-    #     color,
-    #     colorrange,
-    #     alpha=0.5,
-    #     inspector_label=(_, i, _) -> "$(df.GBIFSpecies[i])\nClass: $(df.className[i])\nIsland: $(df.Location[i])\nArea: $(df.Area[i])\nMass: $(ys[i])\nExtinct: $(xs[i])",
-    # )
-    # if names == :text
-    #     Makie.text!(ax, xs, ys; text=df.GBIFSpecies)
-    # end
-    # p = Makie.plot!(ax, longlived.yearLastSeen_cleaned, longlived.EstimatedMass; color=(:yellow, 0.5), label="Long lived")#; color=df.colonised, colormap=:viridis)
 
-    xs, ys = df.yearLastSeen_cleaned, df.EstimatedMass
+    xs = df.yearLastSeen_cleaned
     if !isnothing(colonised)
         Makie.vlines!(ax, df.colonised; linewidth=2, color=colonised, label="Colonisation")
     end
     if isnothing(trend) # Do a loess regression
-        model = loess(xs, log.(ys), span=1.0, degree=2)
+        model = loess(xs, log.(df.EstimatedMass), span=1.0, degree=2)
         us = range(extrema(xs)...; step=5)
         vs = exp.(predict(model, us))
         Makie.lines!(ax, us, vs; linewidth=2, label="Loess regression", color=(:black, 0.8))
@@ -158,7 +145,7 @@ function plot_extinctions!(ax::Axis, df;
         )
         translate!(confidence_band, 0, 0, -10)
     end
-    mean_line = Makie.hlines!(ax, geomean(ys); 
+    mean_line = Makie.hlines!(ax, geomean(df.EstimatedMass); 
         linewidth=2, 
         label="Geometric\nmean",
         color=:grey,
