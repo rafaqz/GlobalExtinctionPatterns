@@ -20,6 +20,8 @@ classes = ["AVES", "MAMMALIA", "REPTILIA"]
 mass_df = load_mass_table(; classes=nothing)
 mass_df.threat_groups = get_threat_groups(mass_df, datapath)
 mass_df.threat_codes = get_threat_codes(mass_df, datapath)
+
+GEP.add_threat_categories!(mass_df)
 subsets = get_subsets(mass_df)
 
 function GEP.plot_threat_density!(ax, df; classes, colors)

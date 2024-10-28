@@ -61,11 +61,12 @@ OTHER_CAUSED = [
     "12.1",
 ]
 
-function add_threat_categories(df)
-    df.human_thre = subset(df, :threat_codes => ByRow(x -> any(c -> c in x, HUMAN_CAUSED)))
-    df.invasive_thre = subset(df, :threat_codes => ByRow(x -> any(c -> c in x, INVASIVE_CAUSED)))
-    df.lcc_thre = subset(df, :threat_codes => ByRow(x -> any(c -> c in x, LCC_CAUSED)))
-    df.other_thre = subset(df, :threat_codes => ByRow(x -> any(c -> c in x, OTHER_CAUSED)))
+function add_threat_categories!(df)
+    df.human_threat = map(x -> any(c -> c in x, HUMAN_CAUSED), df.threat_codes)
+    df.invasive_threat = map(x -> any(c -> c in x, INVASIVE_CAUSED), df.threat_codes)
+    df.lcc_threat = map(x -> any(c -> c in x, LCC_CAUSED), df.threat_codes)
+    df.other_threat = map(x -> any(c -> c in x, OTHER_CAUSED), df.threat_codes)
+    return df
 end
 
 function get_subsets(full_df;

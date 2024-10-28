@@ -20,6 +20,20 @@ cause_colors = map(i -> get(ColorSchemes.Bay, i/4), 1:4)
 mass_df = load_mass_table(; classes)
 mass_df.threat_groups = get_threat_groups(mass_df, datapath)
 mass_df.threat_codes = get_threat_codes(mass_df, datapath)
+mass_df = GEP.add_threat_categories!(mass_df)
+
+count(mass_df.invasive_threat)
+count(mass_df.human_threat)
+count(mass_df.lcc_threat)
+
+count(mass_df.invasive_threat .& mass_df.lcc_threat)
+count(mass_df.invasive_threat .& mass_df.human_threat)
+count(mass_df.human_threat .& mass_df.lcc_threat) / count(mass_df.lcc_threat)
+count(mass_df.human_threat .& mass_df.lcc_threat) / count(mass_df.human_threat)
+count(mass_df.invasive_threat .& mass_df.human_threat .| mass_df.invasive_threat .& mass_df.lcc_threat) / count(mass_df.invasive_threat)
+count(mass_df.invasive_threat .& mass_df.human_threat .| mass_df.human_threat .& mass_df.lcc_threat) / count(mass_df.human_threat)
+count(mass_df.invasive_threat .& mass_df.lcc_threat .| mass_df.human_threat .& mass_df.lcc_threat) / count(mass_df.lcc_threat)
+
 
 # Add numerical classes for plot colors
 mass_df.classNum = collect(map(x -> findfirst(==(x), intersect(classes, mass_df.className)) , mass_df.className))
