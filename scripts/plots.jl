@@ -45,10 +45,9 @@ geometric_summary = map(subsets) do (; df)
     GEP.geosummary(df.EstimatedMass)
 end
 geometric_means |> pairs
-geometric_stds |> pairs
-
-geometric_summary = map(subsets) do m, s
-end
+geometric_summary |> pairs
+geometric_summary.human_caused
+geometric_summary.invasive_caused
 
 trends = map(subsets) do (; df)
     xs, ys = df.yearLastSeen_cleaned, log.(df.EstimatedMass)

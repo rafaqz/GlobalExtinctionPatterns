@@ -3,7 +3,7 @@ function geosummary(xs)
     lxs = map(log, xs)
     mn = mean(lxs)
     st = std(lxs)
-    return (mn, st, mean=exp(mn), std=exp(st), lower=exp(mn - 2st), upper=exp(mn + 2st))
+    return (mean=exp(mn), std=exp(st), lower=exp(mn - 2st), upper=exp(mn + 2st))
 end
 
 function classify_trend(x_init, y;
