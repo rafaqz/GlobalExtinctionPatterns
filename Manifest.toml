@@ -1,8 +1,8 @@
 # This file is machine-generated - editing it directly is not advised
 
-julia_version = "1.10.5"
+julia_version = "1.10.2"
 manifest_format = "2.0"
-project_hash = "8ec316f3eebea4b03fd8959b1c1075f2f2463d53"
+project_hash = "b7fa348fe208fdb7add162898d3bb7665e96d2ae"
 
 [[deps.ADTypes]]
 git-tree-sha1 = "99a6f5d0ce1c7c6afdb759daa30226f71c54f6b0"
@@ -442,7 +442,7 @@ weakdeps = ["Dates", "LinearAlgebra"]
 [[deps.CompilerSupportLibraries_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "e66e0078-7015-5450-92f7-15fbd957f2ae"
-version = "1.1.1+0"
+version = "1.1.0+0"
 
 [[deps.CompositeTypes]]
 git-tree-sha1 = "bce26c3dab336582805503bed209faab1c279768"
@@ -2134,6 +2134,24 @@ git-tree-sha1 = "45e428421666073eab6f2da5c9d310d99bb12f9b"
 uuid = "189a3867-3050-52da-a836-e630ba90ab69"
 version = "1.2.2"
 
+[[deps.RegressionTables]]
+deps = ["Distributions", "Format", "Statistics", "StatsAPI", "StatsBase", "StatsModels"]
+git-tree-sha1 = "8dfd593b2ad999c61bcb1aefc362431e99cccc81"
+uuid = "d519eb52-b820-54da-95a6-98e1306fdade"
+version = "0.7.7"
+
+    [deps.RegressionTables.extensions]
+    RegressionTablesFixedEffectModelsExt = "FixedEffectModels"
+    RegressionTablesGLFixedEffectModelsExt = "GLFixedEffectModels"
+    RegressionTablesGLMExt = "GLM"
+    RegressionTablesMixedModelsExt = "MixedModels"
+
+    [deps.RegressionTables.weakdeps]
+    FixedEffectModels = "9d5cd8c9-2029-5cab-9928-427838db53e3"
+    GLFixedEffectModels = "bafb0ae5-e5f5-5100-81b6-6a55d777c812"
+    GLM = "38e38edf-8417-5370-95a0-9cbb8c7f171a"
+    MixedModels = "ff71e718-51f3-5ec2-a782-8ffcbfa3c316"
+
 [[deps.RelocatableFolders]]
 deps = ["SHA", "Scratch"]
 git-tree-sha1 = "ffdaf70d81cf6ff22c2b6e733c900c3321cab864"
@@ -2870,7 +2888,7 @@ version = "0.15.1+0"
 [[deps.libblastrampoline_jll]]
 deps = ["Artifacts", "Libdl"]
 uuid = "8e850b90-86db-534c-a0d3-1478176c7d93"
-version = "5.11.0+0"
+version = "5.8.0+1"
 
 [[deps.libdecor_jll]]
 deps = ["Artifacts", "Dbus_jll", "JLLWrappers", "Libdl", "Libglvnd_jll", "Pango_jll", "Wayland_jll", "xkbcommon_jll"]

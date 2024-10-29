@@ -93,7 +93,7 @@ function get_subsets(full_df;
         human_caused_inhabited=(title="Human hunting caused inhabited", query=(:isisland, :wasuninhabited => .!, human_caused,)),
         lcc_caused_inhabited=(title="Land cover change caused inhabited", query=(:isisland, :wasuninhabited => .!, lcc_caused,)),
         other_caused_inhabited=(title="Other caused inhabited", query=(:isisland, :wasuninhabited => .!, other_caused,)),
-        all=(title="", query=()),
+        all=(title="Birds, Mammals and Reptiles", query=()),
         birds=(title="Birds", query=(:className => ByRow(==("AVES")),)),
         mammals=(title="Mammals", query=(:className => ByRow(==("MAMMALIA")),)),
         reptiles=(title="Reptiles", query=(:className => ByRow(==("REPTILIA")),)),

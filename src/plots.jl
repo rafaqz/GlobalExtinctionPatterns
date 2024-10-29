@@ -27,6 +27,7 @@ function plot_extinctions!(fig::Figure, df;
     kw...
 )
     ax = Axis(fig[1, 1];
+        aspect=AxisAspect(1),
         yscale=log10,
         spinewidth=2,
         title, 
@@ -172,7 +173,7 @@ function plot_subsets(subset_layout, subsets, trends;
 )
     fig = Figure(; size, fonts);
     ax_kw = (; yscale=log10, spinewidth, xlabel, ylabel, xticks,
-        xgridwidth=2, ygridwidth=2, 
+        xgridwidth=2, ygridwidth=2, aspect=1,
     )
     axs = map(subset_layout, CartesianIndices(subset_layout)) do key, I
         if isnothing(key)
@@ -181,8 +182,8 @@ function plot_subsets(subset_layout, subsets, trends;
             sub = subsets[key]
             trend = trends[key]
             ax = Axis(fig[Tuple(I)...]; ax_kw...)
-            I[1] == Base.size(subset_layout, 1) || hidexdecorations!(ax; grid=false)
-            I[2] == 1 || hideydecorations!(ax; grid=false)
+            I[1] == Base.size(subset_layout, 1) ? hidexdecorations!(ax; ticks=false, ticklabels=false, label=false) : hidexdecorations!(ax)
+            I[2] == 1 ? hideydecorations!(ax; ticks=false, ticklabels=false, label=false) : hideydecorations!(ax)
             plot_extinctions!(ax, sub.df;
                 title="$(titlecase(string(sub.title))):$(titlejoin)$(titlecase(replace(string(trend.class), "_" => " ")))", 
                 legend=Tuple(I) == (1, 1),

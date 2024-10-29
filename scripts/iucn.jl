@@ -127,8 +127,8 @@ fig = let
     hidedecorations!(ax; label=false, ticks=false, ticklabels=false)
     xlims!(ax, (1500, 2024))
     ylims!(ax, (-0.06, 1.0))
-    df = subsets[sub].df
-    plot_threat_density!(ax, subsets[sub].df; classes, colors=cause_colors)
+    df = subsets[:all].df
+    plot_threat_density!(ax, subsets[:all].df; classes, colors=cause_colors)
     Legend(fig[0, 4], ax; 
         position=(0.0, 0.13), 
         framevisible=false,

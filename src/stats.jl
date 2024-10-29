@@ -3,7 +3,9 @@ function geosummary(xs)
     lxs = map(log, xs)
     mn = mean(lxs)
     st = std(lxs)
-    return (mean=exp(mn), std=exp(st), lower=exp(mn - 2st), upper=exp(mn + 2st))
+    n = length(xs)
+    sterr = st / sqrt(n)
+    return (mean=exp(mn), std=exp(st), n, lower=exp(mn - 1.96sterr), upper=exp(mn + 1.96sterr))
 end
 
 function classify_trend(x_init, y;
@@ -94,3 +96,6 @@ end
 #     # end
 # end
 
+# data is in a DataFrame `dat` with names :years, :years2, :late, :inhabit and :body
+
+# sort data by the x axis and fit a model

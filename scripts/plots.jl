@@ -22,49 +22,14 @@ mass_df.threat_groups = get_threat_groups(mass_df, datapath)
 mass_df.threat_codes = get_threat_codes(mass_df, datapath)
 mass_df = GEP.add_threat_categories!(mass_df)
 
-count(mass_df.invasive_threat)
-count(mass_df.human_threat)
-count(mass_df.lcc_threat)
-
-count(mass_df.invasive_threat .& mass_df.lcc_threat)
-count(mass_df.invasive_threat .& mass_df.human_threat)
-count(mass_df.human_threat .& mass_df.lcc_threat) / count(mass_df.lcc_threat)
-count(mass_df.human_threat .& mass_df.lcc_threat) / count(mass_df.human_threat)
-count(mass_df.invasive_threat .& mass_df.human_threat .| mass_df.invasive_threat .& mass_df.lcc_threat) / count(mass_df.invasive_threat)
-count(mass_df.invasive_threat .& mass_df.human_threat .| mass_df.human_threat .& mass_df.lcc_threat) / count(mass_df.human_threat)
-count(mass_df.invasive_threat .& mass_df.lcc_threat .| mass_df.human_threat .& mass_df.lcc_threat) / count(mass_df.lcc_threat)
-
-
 # Add numerical classes for plot colors
 mass_df.classNum = collect(map(x -> findfirst(==(x), intersect(classes, mass_df.className)) , mass_df.className))
 subsets = get_subsets(mass_df)
-geometric_means = map(subsets) do (; df)
-    geomean(df.EstimatedMass)
-end
-geometric_summary = map(subsets) do (; df)
-    GEP.geosummary(df.EstimatedMass)
-end
-geometric_means |> pairs
-geometric_summary |> pairs
-geometric_summary.human_caused
-geometric_summary.invasive_caused
 
 trends = map(subsets) do (; df)
     xs, ys = df.yearLastSeen_cleaned, log.(df.EstimatedMass)
     classify_trend(xs, ys)
 end
-
-# using TerminalPager
-# mass_df |> pager
-
-# Inspect the data
-# sort(mass_df.Location |> countmap |> pairs |> collect; by=last)
-# sort(mass_df.Archipelago |> countmap |> pairs |> collect; by=last)
-# sort(mass_df.SuperArchipelago |> countmap |> pairs |> collect; by=last)
-# sort(collect(mass_df.Archipelago |> countmap); by=last)
-
-# Subsetting #################################################################3
-
 
 # Mass vs Extinction time plots ####################################################################3
 
