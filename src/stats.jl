@@ -1,10 +1,18 @@
+#
+# We want summary of geometric mean to display 
+# with regular masses rather than log masses
+# Unfortunately ther is no built-in geometric std or confint
 geostd(xs) = exp(std(Iterators.map(log, xs)))
 function geosummary(xs)
+    # Convert to log masses
     lxs = map(log, xs)
     mn = mean(lxs)
     st = std(lxs)
     n = length(xs)
+    # Assume standard error is fine because n is large
     sterr = st / sqrt(n)
+
+    # Return mean, std, n and confidence interval converted back to regular mass
     return (mean=exp(mn), std=exp(st), n, lower=exp(mn - 1.96sterr), upper=exp(mn + 1.96sterr))
 end
 

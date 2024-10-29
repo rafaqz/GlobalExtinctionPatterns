@@ -1,3 +1,5 @@
+# Set the GBIFSpecies column by querying the GBIF with species match from GBIF2.jl. 
+# This can be used to standardise to the GBIF taxonomic backbone
 function set_gbif_species!(df::DataFrame, specieskey::Symbol)
     if !("GBIFSpecies" in names(df))
         df.GBIFSpecies .= ""

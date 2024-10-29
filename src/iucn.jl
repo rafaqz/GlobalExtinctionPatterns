@@ -1,18 +1,3 @@
-const cause_labels = [
-    "Residential & commercial"
-    "Agriculture & aquaculture"
-    "Energy production & mining"
-    "Transport corridors"
-    "Biological resource use"
-    "Human disturbance"
-    "Natural system modifications"
-    "Invasive & diseases"
-    "Pollution"
-    "Geological events"
-    "Climate & weather"
-    "Other options"
-]
-
 # Species
 function get_flat_threats(threats_dict)
     threatkeys = nothing
@@ -99,9 +84,7 @@ function plot_threat_density!(ax, df;
     groups = map(group_queries) do q
         subset(df, q)
     end
-    # selected_threats = eachindex(cause_labels)
     upper = nothing
-    # k = cause_labels[a]
     # group = threat_groups[a]
     all_years = collect(skipmissing(df.yearLastSeen_cleaned))
     kde_kw = (; boundary=(1350, 2025), npoints=2025-1350+1, bandwidth=25)

@@ -33,7 +33,6 @@ include("stats.jl")
 include("tables.jl")
 include("gbif.jl")
 include("plots.jl")
-include("traits.jl")
 include("subsets.jl")
 include("iucn.jl")
 

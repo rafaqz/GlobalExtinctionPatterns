@@ -1,23 +1,5 @@
-function meanmass(xs)
-    xs1 = filter(skipmissing(xs)) do x
-        x > 0
-    end
-    if length(xs1) > 0
-        mean(xs1)
-    else
-        missing
-    end
-end
 
-function load_mass_traits(s, datasets;
-    weigelt_csv,
-    heinen_csv,
-)
-
-    heinen_mass = CSV.read(heinen_csv, DataFrame;
-        missingstring="NA", types=Dict(:Mean_Body_Mass_Heinen_gram => Float64)
-    ) |> x -> select(x, [:GBIFSpecies, :Mean_Body_Mass_Heinen_gram])
-
+function load_mass_traits(df, datasets)
     # Open all csvs as DataFrames
     trait_dfs = map(trait_csvs) do props
         df = CSV.read(props.csv, DataFrame; types=Dict(props.mass => Float64))
@@ -60,42 +42,31 @@ function load_mass_traits(s, datasets;
         [:Mass_mean => meanmass => :Genus_mass_mean, :Mass_sources => Tuple => :Genus_mass_sources],
     ) |> sort
 
-    s_mass = leftjoin(s, mean_mass_df; on=:GBIFSpecies, matchmissing=:notequal, makeunique=true) |>
-         x -> leftjoin(x, genus_mean_mass_df; on=:Genus, matchmissing=:notequal) |>
-         x -> leftjoin(x, heinen_mass; on=:GBIFSpecies)
+    df_mass = leftjoin(df, mean_mass_df; on=:GBIFSpecies, matchmissing=:notequal, makeunique=true) |>
+         x -> leftjoin(x, genus_mean_mass_df; on=:Genus, matchmissing=:notequal)
 
-    class_means = map(collect(groupby(s_mass, :className))) do group
+    class_means = map(collect(groupby(df_mass, :className))) do group
         union(group.className)[1] => exp(mean(log.(skipmissing(group.Mass_mean))))
     end |> Dict
 
-    s_mass.EstimatedMass = map(s_mass.className, s_mass.Mass_mean, s_mass.Genus_mass_mean, s_mass.Mean_Body_Mass_Heinen_gram, s_mass.LiteratureMass) do class, mm, gm, hm, lm
+    # Choose mass source depending on what is available
+    df_mass.EstimatedMass = map((mass_df.Mass_mean, mass_df.Genus_mass_mean, mass_df.LiteratureMass)) do mm, gm, lm
         # First check dataset species mean
         x = if ismissing(mm) || isnan(mm)
-            # Then check mass manually taken from the literature
-            if ismissing(lm)
-                # Then Heinen, otherwise use genus mean
-                ismissing(hm) ? gm : hm
-            else
-                lm
-            end
+            # Then check mass manually taken from the literature, otherwise use the genus mean
+            ismissing(lm) ? gm : lm
         else
             mm
         end
-        if (ismissing(x) || isnan(x))
-            missing
-            # Generate random gapfil data until there are no missing masses
-            # class_means[class]
-        else
-            x
-        end
+        (ismissing(x) || isnan(x)) ? missing : x
     end;
 
-    s_mass.EstimatedMass |> skipmissing |> collect |> length
-    s_mass.colonised = map(s_mass.ArchipelagoColonised, s_mass.LocationColonised) do a, i
+    df_mass.EstimatedMass |> skipmissing |> collect |> length
+    df_mass.colonised = map(df_mass.ArchipelagoColonised, df_mass.LocationColonised) do a, i
         ismissing(i) ? a : i
     end
-    s_mass.isisland = s_mass.Island .== "Yes"
-    s_mass.wasuninhabited = map(s_mass.ArchipelagoPreviouslyInhabited .== ("No",), s_mass.LocationPreviouslyInhabited .== ("No",)) do a, i
+    df_mass.isisland = df_mass.Island .== "Yes"
+    df_mass.wasuninhabited = map(df_mass.ArchipelagoPreviouslyInhabited .== ("No",), df_mass.LocationPreviouslyInhabited .== ("No",)) do a, i
         if ismissing(a)
             if ismissing(i)
                 false
@@ -109,11 +80,23 @@ function load_mass_traits(s, datasets;
         end
     end
     # Backfill missing last seen years with colonised years
-    s_mass.yearLastSeen_cleaned .= ((x, c) -> ismissing(x) ? c : x).(s_mass.yearLastSeen_cleaned, s_mass.colonised)
+    df_mass.yearLastSeen_cleaned .= ((x, c) -> ismissing(x) ? c : x).(df_mass.yearLastSeen_cleaned, df_mass.colonised)
 
+    return (; df_mass, mean_mass_df)
+end
+
+# Calculate the mean mass of a column,
+# being careful to skip missings and zero values
+# If there is nothing left we return missing, otherwise the mean
+function meanmass(xs)
+    xs_cleaned = filter(skipmissing(xs)) do x
+        x > 0
+    end
+    return isempty(xs_cleaned) ? missing : mean(xs_cleaned)
+end
+# Add weigelt IDs
+# Not actually used yet, but allows island size/distance analysis
+function add_weigelt!(df)
     weigelt_islands = CSV.read(weigelt_csv, DataFrame)
-
-    s_weigelt = leftjoin(s_mass, weigelt_islands; on=:WeigeltID=>:ID, matchmissing=:notequal, makeunique=true)
-    s1 = dropmissing(s_weigelt, [:colonised, :EstimatedMass, :yearLastSeen_cleaned])
-    return (; s1, mean_mass_df)
+    df_weigelt = leftjoin(df, weigelt_islands; on=:WeigeltID=>:ID, matchmissing=:notequal, makeunique=true)
 end
