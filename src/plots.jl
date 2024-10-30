@@ -93,6 +93,7 @@ function plot_extinctions!(ax::Axis, df;
     classes = ["AVES", "MAMMALIA", "REPTILIA"],
     legend=true,
     density=false,
+    showmean=true,
     kw...
 )
     xlims!(ax, xlims)
@@ -146,12 +147,14 @@ function plot_extinctions!(ax::Axis, df;
         )
         translate!(confidence_band, 0, 0, -10)
     end
-    mean_line = Makie.hlines!(ax, geomean(df.EstimatedMass); 
-        linewidth=2, 
-        label="Geometric\nmean",
-        color=:grey,
-    )
-    translate!(mean_line, 0, 0, -20)
+    if showmean
+        mean_line = Makie.hlines!(ax, geomean(df.EstimatedMass); 
+            linewidth=2, 
+            label="Geometric\nmean",
+            color=:grey,
+        )
+        translate!(mean_line, 0, 0, -20)
+    end
 
     DataInspector(ax)
 end
@@ -170,6 +173,8 @@ function plot_subsets(subset_layout, subsets, trends;
     xticks=XTICKS, 
     spinewidth=2, 
     fonts=(; regular="Arial"),
+    showtitle=true,
+    showmean=true,
 )
     fig = Figure(; size, fonts);
     ax_kw = (; yscale=log10, spinewidth, xlabel, ylabel, xticks,
@@ -184,11 +189,11 @@ function plot_subsets(subset_layout, subsets, trends;
             ax = Axis(fig[Tuple(I)...]; ax_kw...)
             I[1] == Base.size(subset_layout, 1) ? hidexdecorations!(ax; ticks=false, ticklabels=false, label=false) : hidexdecorations!(ax)
             I[2] == 1 ? hideydecorations!(ax; ticks=false, ticklabels=false, label=false) : hideydecorations!(ax)
+            title = showtitle ? "$(titlecase(string(sub.title))):$(titlejoin)$(titlecase(replace(string(trend.class), "_" => " ")))" : ""
             plot_extinctions!(ax, sub.df;
-                title="$(titlecase(string(sub.title))):$(titlejoin)$(titlecase(replace(string(trend.class), "_" => " ")))", 
                 legend=Tuple(I) == (1, 1),
                 names=:tooltip,
-                colormap, trend, ax_kw...
+                showmean, title, colormap, trend, ax_kw...
             )
         end
         xlims!(ax, (1470, 2030))

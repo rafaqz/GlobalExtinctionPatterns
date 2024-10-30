@@ -53,25 +53,40 @@ function classify_trend(x_init, y;
             acceleration < 0 ? :accelerated_decline : :decelerated_decline
         else
             acceleration = sign(α2)
-            class = α2 > 0 ? :convex : :concave
+            α2 > 0 ? :convex : :concave
         end
-    elseif (p_α2 < significant)
+    elseif p_α2 < significant
         acceleration = sign(α2)
-        class = α2 > 0 ? :convex : :concave
-    else # Linear
-        model = lm(@formula(y ~ x), (; x, y))
-        ct = coeftable(model)
+        α2 > 0 ? :convex : :concave
+    else # Try linear only
+        model1 = lm(@formula(y ~ x), (; x, y))
+        ct = coeftable(model1)
         α0, α1 = ct.cols[1]
         p_α0, p_α1 = ct.cols[ct.pvalcol]
-        α2 = missing
-        p_α2 = missing
-        class = if (p_α1 < significant)
+        if (p_α1 < significant)
+            α2 = missing
+            p_α2 = missing
+            model = model1
             velocity = abs(α1)
             α1 > 0 ? :constant_increase : :constant_decline
-        else
-            :stable
+        else # Try polynomial only
+            model2 = lm(@formula(y ~ x^2), (; x, y))
+            ct = coeftable(model2)
+            α0, α1 = ct.cols[1]
+            p_α0, p_α1 = ct.cols[ct.pvalcol]
+            acceleration = sign(α1)
+            if p_α1 < significant
+                α2 = missing
+                p_α2 = missing
+                model = model2
+                α1 > 0 ? :convex : :concave
+            else
+                model = model1
+                :stable
+            end
         end
     end
+
     (; class, r2=r2(model), α0, α1, α2, p_α0, p_α1, p_α2, model)
 end
 

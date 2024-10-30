@@ -24,6 +24,11 @@ mass_df = GEP.add_threat_categories!(mass_df)
 mass_df.classNum = collect(map(x -> findfirst(==(x), intersect(classes, mass_df.className)) , mass_df.className))
 subsets = get_subsets(mass_df)
 
+trends = map(subsets) do (; df)
+    xs, ys = df.yearLastSeen_cleaned, log.(df.EstimatedMass)
+    classify_trend(xs, ys)
+end
+
 # Subset mass means
 geometric_means = map(subsets) do (; df)
     geomean(df.EstimatedMass)
@@ -33,6 +38,21 @@ geometric_summary = map(subsets) do (; df)
 end
 geometric_means |> pairs
 geometric_summary |> pairs
+
+
+# Overall model statistics
+trends.all.model
+geometric_summary.all
+geometric_summary
+
+
+zero_threats = mass_df.human_threat .+ mass_df.lcc_threat .+ mass_df.invasive_threat .== 0
+one_threat = mass_df.human_threat .+ mass_df.lcc_threat .+ mass_df.invasive_threat .== 1
+multiple_threats = mass_df.human_threat .+ mass_df.lcc_threat .+ mass_df.invasive_threat .> 1
+sum(zero_threats)
+sum(one_threat)
+sum(multiple_threats)
+
 
 mass_df.log_body = log.(mass_df.EstimatedMass)
 mass_df.late = mass_df.colonised .>= 1750
@@ -88,7 +108,6 @@ mean(mass_df.log_body[mass_df.lcc_threat])
 mean(mass_df.log_body[mass_df.other_threat])
 mean(mass_df.log_body[mass_df.human_threat])
 
-only_one_threat = mass_df.human_threat .+ mass_df.lcc_threat .+ mass_df.invasive_threat .== 1
 mass_df.human_threat .| only_one_threat 
 
 model2 = lm(@formula(log_body ~ human_threat + invasive_threat + lcc_threat), mass_df)
