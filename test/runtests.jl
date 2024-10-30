@@ -1,13 +1,16 @@
-using GlobalExtinctionPatterns, Test
+using GlobalExtinctionPatterns, Test, Random
 
 @testset "test Rigal method trends" begin
+    Random.seed!(1234)
+
     n = 20
     x = range(0, 1, n)
+
     trends = (;
         # Without some added noise the floating point error might be significant
-        stable = range(0.5, 0.5, n) .+ rand(n) .* 0.001,
-        constant_increase = range(0, 1, n) .+ rand(n) .* 0.001,
-        constant_decline = range(1, 0, n) .+ rand(n) .* 0.001,
+        stable = range(0.5, 0.5, n) .+ rand(n) .* 0.01,
+        constant_increase = range(0, 1, n) .+ rand(n) .* 0.01,
+        constant_decline = range(1, 0, n) .+ rand(n) .* 0.01,
         concave = sin.(range(0, π, n)),
         convex = 1 .- sin.(range(0, π, n)),
         accelerated_increase = range(0, 1, n) .+ range(0, 1, n) .^ 2,
