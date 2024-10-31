@@ -24,10 +24,7 @@ function classify_trend(x_init, y;
         return (; class=:none, r2=missing, α0=missing, α1=missing, α2=missing, p_α0=missing, p_α1=missing, p_α2=missing, model=missing)
     end
     xmin, xmax = extrema(x_init)
-    x = (x_init .- xmin)# ./ xmax
-    # x = Float64.(x_init)
-    # ymin, ymax = extrema(y_init)
-    # y = (y_init .- ymin) ./ ymax
+    x = (x_init .- xmin)
 
     model = lm(@formula(y ~ x + x^2), (; x, y))
     ct = coeftable(model)
@@ -52,12 +49,25 @@ function classify_trend(x_init, y;
             acceleration = sign(γ̇(Xm)) * sign(α2)
             acceleration < 0 ? :accelerated_decline : :decelerated_decline
         else
-            acceleration = sign(α2)
             α2 > 0 ? :convex : :concave
         end
+    elseif p_α1 < significant
+        model = lm(@formula(y ~ x), (; x, y))
+        α0, α1 = ct.cols[1]
+        p_α0, p_α1 = ct.cols[ct.pvalcol]
+        if p_α1 < significant
+            α1 > 0 ? :constant_increase : :constant_decline
+        else
+            :stable
+        end
     elseif p_α2 < significant
-        acceleration = sign(α2)
-        α2 > 0 ? :convex : :concave
+        model = lm(@formula(y ~ x^2), (; x, y))
+        if p_α1 < significant
+            α2 > 0 ? :convex : :concave
+        else
+            model = lm(@formula(y ~ x), (; x, y))
+            :stable
+        end
     else # Try linear only
         model1 = lm(@formula(y ~ x), (; x, y))
         ct = coeftable(model1)
@@ -87,38 +97,5 @@ function classify_trend(x_init, y;
         end
     end
 
-    (; class, r2=r2(model), α0, α1, α2, p_α0, p_α1, p_α2, model)
+    (; class, model, r2=r2(model))
 end
-
-
-# @testset "test trends" begin
-#     n = 20
-#     x = range(0, 1, n)
-#     y = rand(n) .+ range(0, 1, n)
-#     trends = (;
-#         stable = range(0.5, 0.5, n),
-#         constant_increase = range(0, 1, n),
-#         constant_decline = range(1, 0, n),
-#         concave = sin.(range(0, π, n)),
-#         convex = 1 .- sin.(range(0, π, n)),
-#         accelerated_increase = range(0, 1, n) .^ 2,
-#         accelerated_decline = 1 .- range(0, 1, n) .^ 2,
-#         decelerated_increase = 1 .- range(1, 0, n) .^ 2,
-#         decelerated_decline = range(1, 0, n) .^ 2,
-#     )
-#     classifications = map(y -> classify_trend(x, y), trends)
-#     classifications.constant_decline
-#     keys(trends) == map(x -> x.class, Tuple(classifications))
-
-#     # fig = Figure()
-#     # ax = Axis(fig[1, 1])
-#     # foreach(trends, keys(trends)) do trend, title
-#     #     text = replace(string(title), '_' => ' ')
-#     #     Makie.lines!(ax, x, trend; label=text)
-#     #     Makie.text!(ax, 0.57, trend[57]; text, align=(:center, :center))
-#     # end
-# end
-
-# data is in a DataFrame `dat` with names :years, :years2, :late, :inhabit and :body
-
-# sort data by the x axis and fit a model

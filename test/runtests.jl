@@ -2,10 +2,8 @@ using GlobalExtinctionPatterns, Test, Random
 
 @testset "test Rigal method trends" begin
     Random.seed!(1234)
-
     n = 20
     x = range(0, 1, n)
-
     trends = (;
         # Without some added noise the floating point error might be significant
         stable = range(0.5, 0.5, n) .+ rand(n) .* 0.01,
@@ -19,6 +17,9 @@ using GlobalExtinctionPatterns, Test, Random
         decelerated_decline = range(1, 0, n) .+ range(1, 0, n) .^ 2,
     )
     classifications = map(y -> classify_trend(x, y), trends)
+
+    keys(trends)
+    map(x -> x.class, Tuple(classifications))
 
     @test keys(trends) == map(x -> x.class, Tuple(classifications))
 end

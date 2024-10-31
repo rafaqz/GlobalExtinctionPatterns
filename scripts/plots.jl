@@ -17,7 +17,7 @@ datapath = joinpath(basepath, "data")
 classes = ["AVES", "MAMMALIA", "REPTILIA"]
 cause_colors = map(i -> get(ColorSchemes.Bay, i/4), 1:4)
 
-mass_df = load_mass_table(; classes)
+mass_df = load_mass_table(; classes, traitspath="")
 mass_df.threat_groups = get_threat_groups(mass_df, datapath)
 mass_df.threat_codes = get_threat_codes(mass_df, datapath)
 mass_df = GEP.add_threat_categories!(mass_df)
@@ -42,6 +42,9 @@ fig = plot_subsets([:all;;], subsets, trends;
 )
 save(joinpath(basepath, "images/all_mass_and_extinction.png"), fig)
 
+# Model
+trends.all.model
+
 # Figure 2: causes
 cause_layout = [
     :invasive_caused :human_caused :lcc_caused
@@ -51,6 +54,11 @@ fig = plot_subsets(cause_layout, subsets, trends;
     legend=(axisnum=3, position=:lt),
 )
 save(joinpath(basepath, "images/mass_and_extinction_causes.png"), fig)
+
+# Models
+trends.invasive_caused.model
+trends.human_caused.model
+trends.lcc_caused.model
 
 # Figure 2: phases
 phases_layout = [
@@ -64,6 +72,11 @@ fig = plot_subsets(phases_layout, subsets, trends;
 )
 save(joinpath(basepath, "images/mass_and_extinction_splits.png"), fig)
 
+# Models
+trends.inhabited_early.model
+trends.inhabited_late.model
+trends.uninhabited_early.model
+trends.uninhabited_late.model
 
 # Appendix 1: classes
 class_layout = [
@@ -74,3 +87,8 @@ fig = plot_subsets(class_layout, subsets, trends;
     legend=(axisnum=1, position=:lt),
 )
 save(joinpath(basepath, "images/class_mass_and_extinction.png"), fig)
+
+# Models
+trends.birds.model
+trends.mammals.model
+trends.reptiles.model

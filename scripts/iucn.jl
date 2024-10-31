@@ -145,15 +145,3 @@ fig = let
 end
 
 save(joinpath(imagepath, "historical_extinction_causes.png"), fig)
-
-group_queries = (
-    :threat_codes => ByRow(x -> any(c -> c in x, GEP.OTHER_CAUSED)),
-    :threat_codes => ByRow(x -> any(c -> c in x, GEP.HUMAN_CAUSED)),
-    :threat_codes => ByRow(x -> any(c -> c in x, GEP.INVASIVE_CAUSED)),
-    :threat_codes => ByRow(x -> any(c -> c in x, GEP.LCC_CAUSED)),
-)
-groups = map(group_queries) do q
-    subset(subsets[:all].df, q)
-end
-groups[1].threat_codes
-filter(r -> !("8.1.2" in r.threat_codes), groups[1]).threat_codes
